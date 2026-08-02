@@ -37,7 +37,7 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard],
     component: SidebarLayout,
-    data: { navItems: adminNav, title: 'Admin SGCM', roleName: 'Administrador' },
+    data: { navItems: adminNav, title: 'Admin SGMP', roleName: 'Administrador' },
     children: [
       { path: '', loadComponent: () => import('./features/admin/dashboard/admin-dashboard') },
       { path: 'medicos', loadComponent: () => import('./features/admin/medicos/admin-medicos') },
@@ -50,7 +50,7 @@ export const routes: Routes = [
     path: 'recepcion',
     canActivate: [authGuard],
     component: SidebarLayout,
-    data: { navItems: recepcionNav, title: 'Recepción SGCM', roleName: 'Recepcionista' },
+    data: { navItems: recepcionNav, title: 'Recepción SGMP', roleName: 'Recepcionista' },
     children: [
       { path: '', loadComponent: () => import('./features/recepcion/dashboard/recepcion-dashboard') },
       { path: 'pacientes', loadComponent: () => import('./features/recepcion/pacientes/recepcion-pacientes') },
@@ -62,7 +62,7 @@ export const routes: Routes = [
     path: 'medico',
     canActivate: [authGuard],
     component: SidebarLayout,
-    data: { navItems: medicoNav, title: 'Médico SGCM', roleName: 'Médico' },
+    data: { navItems: medicoNav, title: 'Médico SGMP', roleName: 'Médico' },
     children: [
       { path: '', loadComponent: () => import('./features/medico/dashboard/medico-dashboard') },
       { path: 'consulta/:idCita', loadComponent: () => import('./features/medico/consulta/medico-consulta') },

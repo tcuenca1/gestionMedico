@@ -132,16 +132,16 @@ INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
 
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (1, 'admin@sgcm.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
+VALUES (1, 'admin@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
 
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (2, 'recepcion@sgcm.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true);
+VALUES (2, 'recepcion@sgmp.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true);
 
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (3, 'dr.paredes@sgcm.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true);
+VALUES (3, 'dr.paredes@sgmp.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true);
 
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (3, 'dra.lopez@sgcm.com', '$2b$10$FG2IBuDZjmOmR2RhweG19O7jO5467piPQur1bbpIlmJr.FOx.0Mze', true);
+VALUES (3, 'dra.lopez@sgmp.com', '$2b$10$FG2IBuDZjmOmR2RhweG19O7jO5467piPQur1bbpIlmJr.FOx.0Mze', true);
 
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
 VALUES (4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);

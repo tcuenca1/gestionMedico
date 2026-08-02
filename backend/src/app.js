@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'SGCM API funcionando' });
+  res.json({ status: 'OK', message: 'SGMP API funcionando' });
 });
 
 app.use('/api/auth', authRoutes);

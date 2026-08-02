@@ -130,5 +130,5 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 server.listen(PORT, () => {
-  console.log(`SGCM API corriendo en http://localhost:${PORT}`);
+  console.log(`SGMP API corriendo en http://localhost:${PORT}`);
 });

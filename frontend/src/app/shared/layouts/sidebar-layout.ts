@@ -28,7 +28,7 @@ export class SidebarLayout implements OnInit, OnDestroy {
   }
 
   get title(): string {
-    return this.route.snapshot.data['title'] || 'SGCM';
+    return this.route.snapshot.data['title'] || 'SGMP';
   }
 
   get roleName(): string {
