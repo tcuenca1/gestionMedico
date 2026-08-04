@@ -7,7 +7,7 @@ rem (ejecuta ver-ip.bat y mira la Direccion IPv4 en ip.txt)
 set "REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.51"
 
 echo ============================================
-echo   SGCM Movil
+echo   SGMP Movil
 echo ============================================
 echo.
 echo Carpeta: %CD%

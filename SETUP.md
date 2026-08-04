@@ -1,4 +1,4 @@
-# Guía de Instalación — SGCM (Sistema de Gestión de Consultas Médicas)
+# Guía de Instalación — SGMP (Sistema de Gestión Médica para Policlínicos)
 
 ## Requisitos
 

@@ -1,27 +1,27 @@
 {
   "expo": {
-    "name": "SGCM",
-    "slug": "sgcm-movil",
+    "name": "SGMP",
+    "slug": "sgmp-movil",
     "version": "1.0.0",
-    "scheme": "sgcm",
+    "scheme": "sgmp",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sgcm.movil",
+      "bundleIdentifier": "com.sgmp.movil",
       "infoPlist": {
         "NSCameraUsageDescription": "La app usa la camara para fotografiar examenes de laboratorio.",
         "NSPhotoLibraryUsageDescription": "La app accede a tus fotos para adjuntar examenes de laboratorio."
       }
     },
     "android": {
-      "package": "com.sgcm.movil",
+      "package": "com.sgmp.movil",
       "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
     },
     "plugins": ["expo-router", "expo-image-picker"],
     "extra": {
-      "apiUrl": "http://192.168.1.51:3000/api",
+      "apiUrl": "https://gestionmedico-production-550b.up.railway.app/api",
       "demo": true
     }
   }

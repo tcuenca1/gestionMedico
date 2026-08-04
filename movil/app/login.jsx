@@ -34,10 +34,10 @@ export default function Login() {
     >
       <ScrollView contentContainerStyle={s.contenedor} keyboardShouldPersistTaps="handled">
         <View style={s.logo}>
-          <Text style={s.logoTexto}>SGCM</Text>
+          <Text style={s.logoTexto}>SGMP</Text>
         </View>
-        <Text style={s.titulo}>Clinica Medica</Text>
-        <Text style={s.subtitulo}>Sistema de Gestion de Clinica Medica</Text>
+        <Text style={s.titulo}>Policlínico</Text>
+        <Text style={s.subtitulo}>Sistema de Gestión Médica para Policlínicos</Text>
 
         <Tarjeta>
           <Aviso mensaje={error} />

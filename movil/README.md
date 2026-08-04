@@ -1,4 +1,4 @@
-# SGCM Movil
+# SGMP Movil
 
 Aplicacion movil (React Native + Expo Router) del **Sistema de Gestion de Clinica
 Medica**. No incluye servidor: es un **cliente del backend existente** de
