@@ -22,7 +22,7 @@ function inferirHost() {
   return ip || 'localhost';
 }
 
-const configurada = Constants.expoConfig?.extra?.apiUrl;
+const configurada = Constants.expoConfig?.extra?.apiUrl || 'https://gestionmedico-production-550b.up.railway.app/api';
 
 /**
  * Modo demo: la app responde con datos simulados, sin servidor.

@@ -91,7 +91,7 @@ export const api = {
   async login(usuario, password) {
     const r = await peticion(
       '/auth/login',
-      json('POST', { username: usuario, correo: usuario, password })
+      json('POST', { Username_Correo: usuario, Password: password })
     );
     return r;
   },
