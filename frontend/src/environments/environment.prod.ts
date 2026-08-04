@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://gestionmedico-production-5efa.up.railway.app/api',
+  apiBaseUrl: 'https://gestionmedico-production-550b.up.railway.app/api',
 };

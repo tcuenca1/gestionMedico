@@ -1,117 +1,91 @@
-# Guía de Instalación — SGMP (Sistema de Gestión Médica para Policlínicos)
+# Guía de Instalación y Despliegue — SGMP (Sistema de Gestión Médica para Policlínicos)
 
 ## Requisitos
-
 - **Node.js** ≥ 20
-- **PostgreSQL** 15, 16, 17 o 18
+- **PostgreSQL** (para entorno local) o cuenta en **Railway** (para producción)
 - **Git**
 
-## Paso 1: Clonar el repositorio
+---
 
+## 1. Despliegue del Backend en Railway y Base de Datos
+
+1. Crea un proyecto en [Railway](https://railway.app/) y despliega tu servicio de Node.js a partir del repositorio.
+2. Añade un servicio de base de datos **PostgreSQL**.
+3. Ejecuta el script unificado **`backend/sql/script-completo.sql`** en la base de datos de Railway para crear todas las tablas, relaciones y datos iniciales (incluyendo roles, médicos, pacientes y catálogos).
+4. Genera un dominio público personalizado o asegúrate de tener la URL provista por Railway (por ejemplo: `https://gestionmedico-production-550b.up.railway.app`).
+
+---
+
+## 2. Conectar el Frontend (Angular) con Railway
+
+Para que la aplicación web se conecte al backend desplegado en Railway, edita el archivo de entorno de producción:
+`frontend/src/environments/environment.prod.ts`
+
+```typescript
+export const environment = {
+  production: true,
+  apiBaseUrl: 'https://gestionmedico-production-550b.up.railway.app/api',
+};
+```
+
+Para compilar y probar la versión de producción conectada a Railway:
 ```bash
-git clone https://github.com/benitesy42-tech/GestionMedico.git
-cd GestionMedico
+npm run build --configuration=production
 ```
 
-## Paso 2: Configurar PostgreSQL
+---
 
-Abre **pgAdmin** o la terminal de PostgreSQL y crea la base de datos:
+## 3. Conectar la App Móvil (Expo / React Native) con Railway
 
-```sql
-CREATE DATABASE sgcm;
-```
+La aplicación móvil se encuentra en la carpeta `movil/`. Para conectarla al backend desplegado:
 
-Luego ejecuta los scripts SQL en orden:
+1. Abre el archivo **`movil/app.json`** y configura la URL en la sección `extra`:
+   ```json
+   "extra": {
+     "apiUrl": "https://gestionmedico-production-550b.up.railway.app/api",
+     "demo": false
+   }
+   ```
+2. Inicia la app móvil ejecutando:
+   ```bash
+   cd movil
+   npm install
+   npx expo start -c
+   ```
+3. Escanea el código QR generado en la terminal con la aplicación **Expo Go** instalada en tu teléfono móvil (asegúrate de que tu teléfono tenga conexión a internet móvil o Wi-Fi con acceso a Railway).
 
-```
-C:\Program Files\PostgreSQL\18\bin\psql -U postgres -d sgcm -f backend\sql\schema.sql
-C:\Program Files\PostgreSQL\18\bin\psql -U postgres -d sgcm -f backend\sql\seed.sql
-```
+---
 
-> Ajusta la ruta de `psql` según tu versión de PostgreSQL (cambia `18` por tu versión).
+## 4. Credenciales de Acceso al Sistema
 
-## Paso 3: Configurar el Backend
+Puedes ingresar tanto en la web como en la app móvil con las siguientes cuentas predeterminadas:
 
-Crea el archivo `backend\.env` (copiando el ejemplo):
+| Rol            | Usuario (Correo / DNI) | Contraseña     |
+|----------------|------------------------|----------------|
+| Administrador  | admin@sgmp.com         | admin123       |
+| Recepcionista  | recepcion@sgmp.com     | recepcion123   |
+| Médico         | dr.paredes@sgmp.com    | medico123      |
+| Médico         | dra.lopez@sgmp.com     | medico123      |
+| Paciente       | 1100123456             | paciente123    |
+| Paciente       | 1100789012             | paciente123    |
 
-```env
-PORT=3000
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=sgcm
-DB_USER=postgres
-DB_PASSWORD=TU_CONTRASEÑA
-JWT_SECRET=sgcm_jwt_secret_key_2026
-```
+---
 
-Reemplaza `TU_CONTRASEÑA` con la contraseña de tu usuario `postgres` de PostgreSQL.
-
-## Paso 4: Instalar dependencias
-
-```bash
-cd backend
-npm install
-cd ..
-npm install
-```
-
-## Paso 5: Iniciar el proyecto
-
-Abre **dos terminales**:
-
-**Terminal 1 — Backend (puerto 3000):**
-```bash
-cd backend
-node src/index.js
-```
-
-**Terminal 2 — Frontend (puerto 4200):**
-```bash
-npm start
-```
-
-## Paso 6: Usar el sistema
-
-Abre `http://localhost:4200` en el navegador.
-
-### Credenciales de prueba
-
-| Rol            | Usuario              | Contraseña     |
-|----------------|----------------------|----------------|
-| Administrador  | admin@sgcm.com       | admin123       |
-| Recepcionista  | recepcion@sgcm.com   | recepcion123   |
-| Médico         | dr.paredes@sgcm.com  | medico123      |
-| Médico         | dra.lopez@sgcm.com   | medico123      |
-| Paciente       | 1100123456           | paciente123    |
-| Paciente       | 1100789012           | paciente123    |
-
-## Solución de problemas
-
-### "ECONNREFUSED" al iniciar sesión
-→ El backend no está corriendo. Asegúrate de tener la Terminal 1 abierta con `node src/index.js`.
-
-### "Error: connect ECONNREFUSED ::1:5432"
-→ PostgreSQL no está corriendo. Abre pgAdmin o inicia el servicio de PostgreSQL.
-
-### "password authentication failed"
-→ La contraseña en `backend\.env` no coincide con la de PostgreSQL. Verifica `DB_PASSWORD`.
-
-## Estructura del proyecto
+## 5. Estructura del Proyecto
 
 ```
 GestionMedico/
-├── api/                    # (solo para Vercel, ignorar en local)
 ├── backend/
 │   ├── src/
-│   │   ├── routes/         # Rutas de la API (auth, pacientes, etc.)
-│   │   ├── app.js          # Configuración de Express
+│   │   ├── routes/         # Rutas de la API (auth, pacientes, citas, chat, etc.)
+│   │   ├── app.js          # Configuración de Express y middlewares
 │   │   ├── db.js           # Conexión a PostgreSQL
-│   │   └── index.js        # Punto de entrada del backend
-│   ├── sql/
-│   │   ├── schema.sql      # Creación de tablas
-│   │   └── seed.sql        # Datos de prueba
-│   └── .env                # Configuración local
-├── src/                    # Código del frontend (Angular)
-├── package.json
-└── README.md
+│   │   └── index.js        # Punto de entrada HTTP y Socket.IO
+│   └── sql/
+│       └── script-completo.sql # Script SQL unificado (Tablas + Seed)
+├── frontend/               # Aplicación Web (Angular Standalone)
+│   └── src/environments/   # Entornos de configuración (prod / dev)
+├── movil/                  # Aplicación Móvil (React Native + Expo Router)
+│   └── app.json            # Configuración y apiUrl de Railway
+└── SETUP.md
 ```
