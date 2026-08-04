@@ -1,9 +1,18 @@
 -- =========================================================================
 -- SGMP - Sistema de Gestión Médica para Policlínicos
 -- Script SQL Completo y Unificado para PostgreSQL / Railway
+-- (Incluye Tablas, Índices, Triggers, Funciones y Datos Iniciales)
 -- =========================================================================
 
--- 1. LIMPIEZA DE TABLAS EXISTENTES (Orden inverso por dependencias)
+-- 1. LIMPIEZA DE TABLAS Y FUNCIONES EXISTENTES (Orden inverso por dependencias)
+DROP TRIGGER IF EXISTS trg_validar_fecha_cita ON Cita;
+DROP TRIGGER IF EXISTS trg_validar_fecha_nacimiento ON Paciente;
+DROP TRIGGER IF EXISTS trg_registrar_fecha_pago ON Pago;
+
+DROP FUNCTION IF EXISTS fn_validar_fecha_cita();
+DROP FUNCTION IF EXISTS fn_validar_fecha_nacimiento();
+DROP FUNCTION IF EXISTS fn_registrar_fecha_pago();
+
 DROP TABLE IF EXISTS Log_Acceso_Sensible CASCADE;
 DROP TABLE IF EXISTS Valor_Examen CASCADE;
 DROP TABLE IF EXISTS Rango_Referencia CASCADE;
@@ -216,7 +225,64 @@ CREATE TABLE Rango_Referencia (
     Activo BOOLEAN DEFAULT TRUE
 );
 
--- 5. DATOS INICIALES (Seed Data)
+-- =========================================================================
+-- 5. FUNCIONES Y TRIGGERS DE VALIDACIÓN Y NEGOCIO
+-- =========================================================================
+
+-- A. Función para validar que la fecha de nacimiento no sea futura
+CREATE OR REPLACE FUNCTION fn_validar_fecha_nacimiento()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.Fecha_Nacimiento > CURRENT_DATE THEN
+        RAISE EXCEPTION 'La fecha de nacimiento no puede ser posterior a la fecha actual.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_fecha_nacimiento
+BEFORE INSERT OR UPDATE ON Paciente
+FOR EACH ROW
+EXECUTE FUNCTION fn_validar_fecha_nacimiento();
+
+
+-- B. Función para validar que no se programen citas médicas en el pasado (al crear nuevas citas)
+CREATE OR REPLACE FUNCTION fn_validar_fecha_cita()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' AND NEW.Fecha_Hora < CURRENT_TIMESTAMP THEN
+        RAISE EXCEPTION 'No se pueden programar citas en el pasado.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_fecha_cita
+BEFORE INSERT ON Cita
+FOR EACH ROW
+EXECUTE FUNCTION fn_validar_fecha_cita();
+
+
+-- C. Función para asignar automáticamente la fecha de pago actual
+CREATE OR REPLACE FUNCTION fn_registrar_fecha_pago()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.Estado_Pago = 'Completado' AND (OLD.Estado_Pago IS NULL OR OLD.Estado_Pago != 'Completado') THEN
+        NEW.Fecha_Pago = CURRENT_TIMESTAMP;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_registrar_fecha_pago
+BEFORE INSERT OR UPDATE ON Pago
+FOR EACH ROW
+EXECUTE FUNCTION fn_registrar_fecha_pago();
+
+
+-- =========================================================================
+-- 6. DATOS INICIALES (Seed Data)
+-- =========================================================================
 INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador');
 INSERT INTO Rol (Nombre_Rol) VALUES ('Recepcionista');
 INSERT INTO Rol (Nombre_Rol) VALUES ('Médico');
