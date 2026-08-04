@@ -22,7 +22,7 @@
     "plugins": ["expo-router", "expo-image-picker"],
     "extra": {
       "apiUrl": "https://gestionmedico-production-550b.up.railway.app/api",
-      "demo": true
+      "demo": false
     }
   }
 }
