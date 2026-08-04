@@ -1,18 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import dotenv from 'dotenv';
+import path from 'path';
 
-const authRoutes = require('./routes/auth');
-const medicosRoutes = require('./routes/medicos');
-const pacientesRoutes = require('./routes/pacientes');
-const especialidadesRoutes = require('./routes/especialidades');
-const citasRoutes = require('./routes/citas');
-const consultasRoutes = require('./routes/consultas');
-const pagosRoutes = require('./routes/pagos');
-const dashboardRoutes = require('./routes/dashboard');
-const examenesRoutes = require('./routes/examenes');
-const chatRoutes = require('./routes/chat');
+import authRoutes from './routes/auth';
+import medicosRoutes from './routes/medicos';
+import pacientesRoutes from './routes/pacientes';
+import especialidadesRoutes from './routes/especialidades';
+import citasRoutes from './routes/citas';
+import consultasRoutes from './routes/consultas';
+import pagosRoutes from './routes/pagos';
+import dashboardRoutes from './routes/dashboard';
+import examenesRoutes from './routes/examenes';
+import chatRoutes from './routes/chat';
+
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
 
@@ -36,9 +39,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/examenes', examenesRoutes);
 app.use('/api/chat', chatRoutes);
 
-app.use((err, req, res, next) => {
+app.use((err: any, req: any, res: any, next: any) => {
   console.error('Error no controlado:', err);
   res.status(500).json({ message: 'Error interno del servidor' });
 });
 
-module.exports = app;
+export default app;

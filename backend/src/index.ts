@@ -1,9 +1,11 @@
-const app = require('./app');
-const http = require('http');
-const { Server } = require('socket.io');
-const jwt = require('jsonwebtoken');
-const pool = require('./db');
-require('dotenv').config();
+import app from './app';
+import http from 'http';
+import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
+import pool from './db';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
@@ -15,12 +17,12 @@ const io = new Server(server, {
   },
 });
 
-const onlineUsers = new Map();
+const onlineUsers = new Map<number, Set<string>>();
 
-io.use((socket, next) => {
+io.use((socket: any, next) => {
   const token = socket.handshake.auth.token;
   if (!token) return next(new Error('Token requerido'));
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err: any, user: any) => {
     if (err) return next(new Error('Token inválido'));
     socket.userId = user.id;
     socket.userRole = user.rol;
@@ -28,20 +30,20 @@ io.use((socket, next) => {
   });
 });
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: any) => {
   const userId = socket.userId;
   socket.join(`user_${userId}`);
 
   if (!onlineUsers.has(userId)) {
     onlineUsers.set(userId, new Set());
   }
-  onlineUsers.get(userId).add(socket.id);
+  onlineUsers.get(userId)!.add(socket.id);
 
-  if (onlineUsers.get(userId).size === 1) {
+  if (onlineUsers.get(userId)!.size === 1) {
     io.emit('usuario:estado', { usuario_id: userId, en_linea: true });
   }
 
-  socket.on('mensaje:enviar', async (data) => {
+  socket.on('mensaje:enviar', async (data: any) => {
     try {
       const { conversacion_id, contenido } = data;
       if (!conversacion_id || !contenido?.trim()) return;
@@ -76,11 +78,8 @@ io.on('connection', (socket) => {
         para_usuario_id: otroId,
       };
 
-      // Emit to conversation room (both users if they have it open)
       io.to(`conv_${conversacion_id}`).emit('mensaje:nuevo', payload);
-      // Emit to other user's personal room so they get notified even if conv not open
       io.to(`user_${otroId}`).emit('mensaje:nuevo', payload);
-      // Also emit to sender (for multi-tab support)
       io.to(`user_${userId}`).emit('mensaje:nuevo', payload);
     } catch (err) {
       console.error('Error al enviar mensaje:', err);
@@ -88,7 +87,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('conversacion:abrir', async (data) => {
+  socket.on('conversacion:abrir', async (data: any) => {
     try {
       const { conversacion_id } = data;
       if (!conversacion_id) return;
@@ -110,7 +109,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('conversacion:salir', (data) => {
+  socket.on('conversacion:salir', (data: any) => {
     if (data?.conversacion_id) {
       socket.leave(`conv_${data.conversacion_id}`);
     }
@@ -118,8 +117,8 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     if (onlineUsers.has(userId)) {
-      onlineUsers.get(userId).delete(socket.id);
-      if (onlineUsers.get(userId).size === 0) {
+      onlineUsers.get(userId)!.delete(socket.id);
+      if (onlineUsers.get(userId)!.size === 0) {
         onlineUsers.delete(userId);
         io.emit('usuario:estado', { usuario_id: userId, en_linea: false });
       }
@@ -130,5 +129,5 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 server.listen(PORT, () => {
-  console.log(`SGMP API corriendo en http://localhost:${PORT}`);
+  console.log(`SGMP API (TypeScript) corriendo en http://localhost:${PORT}`);
 });
