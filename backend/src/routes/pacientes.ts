@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/', authenticateToken, async (req: any, res: any) => {
   try {
-    const result = await pool.query('SELECT * FROM Paciente ORDER BY Apellidos');
+    const result = await pool.query('SELECT * FROM Paciente ORDER BY ID_Paciente ASC');
     res.json(normalizeRows(result.rows));
   } catch (error) {
     console.error('Error al obtener pacientes:', error);

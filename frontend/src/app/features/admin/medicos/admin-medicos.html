@@ -35,7 +35,7 @@
             </div>
             <div class="col-md-4">
               <label class="form-label">Usuario (Correo)</label>
-              <input class="form-control" [(ngModel)]="form.Username_Correo" name="username" [disabled]="editing()" />
+              <input class="form-control" [(ngModel)]="form.Username_Correo" name="username" required />
             </div>
             @if (!editing()) {
               <div class="col-md-4">

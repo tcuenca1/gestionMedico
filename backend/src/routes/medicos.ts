@@ -13,7 +13,7 @@ router.get('/', authenticateToken, async (req: any, res: any) => {
        FROM Medico m
        JOIN Especialidad e ON m.ID_Especialidad = e.ID_Especialidad
        JOIN Usuario u ON m.ID_Usuario = u.ID_Usuario
-       ORDER BY m.Apellidos`,
+       ORDER BY m.ID_Medico ASC`,
     );
     res.json(normalizeRows(result.rows));
   } catch (error) {
@@ -81,24 +81,37 @@ router.post('/', authenticateToken, requireRole('Administrador'), async (req: an
 });
 
 router.put('/:id', authenticateToken, requireRole('Administrador'), async (req: any, res: any) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
-    const { Nombres, Apellidos, ID_Especialidad, Numero_Colegiatura } = req.body;
+    const { Nombres, Apellidos, ID_Especialidad, Numero_Colegiatura, Username_Correo } = req.body;
 
-    const result = await pool.query(
+    await client.query('BEGIN');
+
+    const result = await client.query(
       `UPDATE Medico SET Nombres = $1, Apellidos = $2, ID_Especialidad = $3, Numero_Colegiatura = $4
        WHERE ID_Medico = $5 RETURNING *`,
       [Nombres, Apellidos, ID_Especialidad, Numero_Colegiatura, id],
     );
 
     if (result.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ message: 'Médico no encontrado' });
     }
 
+    if (Username_Correo) {
+      const userId = result.rows[0].id_usuario;
+      await client.query('UPDATE Usuario SET Username_Correo = $1 WHERE ID_Usuario = $2', [Username_Correo, userId]);
+    }
+
+    await client.query('COMMIT');
     res.json(normalizeRow(result.rows[0]));
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error al actualizar médico:', error);
     res.status(500).json({ message: 'Error al actualizar médico' });
+  } finally {
+    client.release();
   }
 });
 

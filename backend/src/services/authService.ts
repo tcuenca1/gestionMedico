@@ -34,6 +34,7 @@ export async function loginService(usernameCorreo: string, password: string) {
 
     let nombreCompleto = '';
     let idMedico = null;
+    let idPaciente = null;
 
     if (usuario.nombre_rol === 'Médico' || usuario.nombre_rol === 'Medico') {
         const medico = await findMedicoByUserId(usuario.id_usuario);
@@ -44,6 +45,7 @@ export async function loginService(usernameCorreo: string, password: string) {
     } else if (usuario.nombre_rol === 'Paciente') {
         const paciente = await findPacienteByUserId(usuario.id_usuario);
         if (paciente) {
+            idPaciente = paciente.id_paciente;
             nombreCompleto = `${paciente.nombres} ${paciente.apellidos}`;
         }
     }
@@ -63,5 +65,6 @@ export async function loginService(usernameCorreo: string, password: string) {
         nombreCompleto,
         rol: usuario.nombre_rol,
         idMedico,
+        idPaciente,
     };
 }

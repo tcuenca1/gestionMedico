@@ -98,6 +98,7 @@ export default function Conversacion() {
           const propio = String(item.idEmisor) === String(usuario?.id);
           return (
             <View style={[s.burbuja, propio ? s.propia : s.ajena]}>
+              {!propio ? <Text style={s.remitente}>{item.remitenteNombre || 'Usuario'}</Text> : null}
               <Text style={[s.texto, propio && { color: '#fff' }]}>{item.texto}</Text>
               <Text style={[s.hora, propio && { color: '#ffffffaa' }]}>{formatoHora(item.fecha)}</Text>
             </View>
@@ -127,6 +128,7 @@ const s = StyleSheet.create({
   burbuja: { maxWidth: '80%', padding: esp.sm + 2, borderRadius: radio, marginBottom: esp.sm },
   propia: { alignSelf: 'flex-end', backgroundColor: colores.primario },
   ajena: { alignSelf: 'flex-start', backgroundColor: colores.tarjeta, borderWidth: 1, borderColor: colores.borde },
+  remitente: { fontSize: 11, fontWeight: '700', color: colores.primario, marginBottom: 2 },
   texto: { color: colores.texto, fontSize: 15 },
   hora: { color: colores.textoSuave, fontSize: 10, marginTop: 2, alignSelf: 'flex-end' },
   sistema: { alignSelf: 'center', backgroundColor: colores.primarioSuave, borderRadius: 999, paddingHorizontal: esp.md, paddingVertical: 6, marginBottom: esp.sm },

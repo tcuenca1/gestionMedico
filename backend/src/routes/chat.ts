@@ -144,9 +144,13 @@ router.get('/conversaciones/:id/mensajes', authenticateToken, async (req: any, r
     }
 
     const result = await pool.query(
-      `SELECT ID_Mensaje AS id, ID_Conversacion AS conversacion_id, Remitente_ID AS remitente_id,
-              Contenido AS contenido, Tipo AS tipo, Leido AS leido, Creado_En AS creado_en
-       FROM Mensaje WHERE ID_Conversacion = $1 ORDER BY Creado_En ASC`,
+      `SELECT m.ID_Mensaje AS id, m.ID_Conversacion AS conversacion_id, m.Remitente_ID AS remitente_id,
+              m.Contenido AS contenido, m.Tipo AS tipo, m.Leido AS leido, m.Creado_En AS creado_en,
+              COALESCE(NULLIF(med.Nombres || ' ' || med.Apellidos, ' '), u.Username_Correo) AS remitente_nombre
+       FROM Mensaje m
+       LEFT JOIN Usuario u ON m.Remitente_ID = u.ID_Usuario
+       LEFT JOIN Medico med ON u.ID_Usuario = med.ID_Usuario
+       WHERE m.ID_Conversacion = $1 ORDER BY m.Creado_En ASC`,
       [convId],
     );
 

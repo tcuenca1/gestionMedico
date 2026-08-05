@@ -18,7 +18,7 @@ export async function findMedicoByUserId(userId: number) {
 
 export async function findPacienteByUserId(userId: number) {
     const result = await pool.query(
-        'SELECT Nombres, Apellidos FROM Paciente WHERE ID_Usuario = $1',
+        'SELECT ID_Paciente, Nombres, Apellidos FROM Paciente WHERE ID_Usuario = $1',
         [userId],
     );
     return result.rows[0] || null;

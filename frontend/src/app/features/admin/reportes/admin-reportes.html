@@ -14,11 +14,21 @@
           <label class="form-label">Fecha Fin</label>
           <input type="date" class="form-control" [(ngModel)]="fechaFin" [max]="today" />
         </div>
-        <div class="col-md-auto">
-          <button class="btn btn-primary" (click)="generateReporte()" [disabled]="loading() || !fechaInicio() || !fechaFin()">
-            @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
-            Generar Reporte
-          </button>
+        <div class="col-12 d-flex gap-2 flex-wrap align-items-center">
+          <button class="btn btn-sm btn-outline-secondary" (click)="setRango('semana')">Última Semana</button>
+          <button class="btn btn-sm btn-outline-secondary" (click)="setRango('mes')">Último Mes</button>
+          <button class="btn btn-sm btn-outline-secondary" (click)="setRango('anio')">Último Año</button>
+          <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-primary" (click)="generateReporte()" [disabled]="loading() || !fechaInicio() || !fechaFin()">
+              @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              Generar Reporte
+            </button>
+            @if (showReporte()) {
+              <button class="btn btn-danger" (click)="downloadPdf()">
+                📥 Descargar PDF
+              </button>
+            }
+          </div>
         </div>
         @if (errorMsg()) {
           <div class="col-12"><div class="alert alert-danger py-2 mb-0 animate-slide-down">{{ errorMsg() }}</div></div>

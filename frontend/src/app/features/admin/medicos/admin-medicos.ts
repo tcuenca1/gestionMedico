@@ -61,7 +61,7 @@ export default class AdminMedicosComponent {
       Nombres: m.Nombres,
       Apellidos: m.Apellidos,
       Numero_Colegiatura: m.Numero_Colegiatura,
-      Username_Correo: '',
+      Username_Correo: m.Username_Correo || '',
     };
     this.editing.set(true);
     this.selectedId.set(m.ID_Medico);
@@ -80,6 +80,7 @@ export default class AdminMedicosComponent {
         Nombres: this.form.Nombres,
         Apellidos: this.form.Apellidos,
         Numero_Colegiatura: this.form.Numero_Colegiatura,
+        Username_Correo: this.form.Username_Correo,
       }).subscribe({
         next: () => {
           this.loading.set(false);

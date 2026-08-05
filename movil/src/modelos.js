@@ -256,11 +256,12 @@ export function normMensaje(m) {
   if (!m) return null;
   return {
     id: campo(m, 'ID_Mensaje', 'idMensaje', 'id'),
-    idConversacion: campo(m, 'ID_Conversacion', 'idConversacion'),
-    idEmisor: campo(m, 'ID_Emisor', 'idEmisor', 'ID_Usuario', 'idUsuario'),
+    idConversacion: campo(m, 'ID_Conversacion', 'idConversacion', 'conversacionId', 'conversacion_id'),
+    idEmisor: campo(m, 'ID_Emisor', 'idEmisor', 'ID_Usuario', 'idUsuario', 'remitente_id', 'remitenteId'),
+    remitenteNombre: campo(m, 'remitente_nombre', 'remitenteNombre', 'nombre') || 'Usuario',
     texto: campo(m, 'Contenido', 'contenido', 'Texto', 'texto', 'mensaje') || '',
     tipo: String(campo(m, 'Tipo', 'tipo') || 'texto').toLowerCase(),
-    fecha: campo(m, 'Fecha', 'fecha', 'Fecha_Envio', 'createdAt') || '',
+    fecha: campo(m, 'Fecha', 'fecha', 'Fecha_Envio', 'createdAt', 'creado_en') || '',
     leido: campo(m, 'Leido', 'leido') === true,
     crudo: m
   };

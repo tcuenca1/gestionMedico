@@ -25,7 +25,27 @@ export default class AdminReportesComponent {
     return Number(monto).toFixed(2);
   }
 
-  generateReporte(): void {
+  setRango(tipo: 'semana' | 'mes' | 'anio'): void {
+    const fin = new Date();
+    const inicio = new Date();
+    if (tipo === 'semana') {
+      inicio.setDate(fin.getDate() - 7);
+    } else if (tipo === 'mes') {
+      inicio.setMonth(fin.getMonth() - 1);
+    } else if (tipo === 'anio') {
+      inicio.setFullYear(fin.getFullYear() - 1);
+    }
+    this.fechaFin.set(fin.toISOString().split('T')[0]);
+    this.fechaInicio.set(inicio.toISOString().split('T')[0]);
+    this.generateReporte();
+  }
+
+  downloadPdf(): void {
+    if (!this.fechaInicio() || !this.fechaFin()) return;
+    const token = localStorage.getItem('token') || '';
+    const url = `http://localhost:3000/api/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}&token=${token}`;
+    window.open(url, '_blank');
+  }
     this.errorMsg.set('');
     if (!this.fechaInicio() || !this.fechaFin()) return;
     if (this.fechaInicio() > this.fechaFin()) {

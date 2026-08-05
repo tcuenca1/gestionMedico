@@ -17,4 +17,5 @@ export interface LoginResponse {
   nombreCompleto: string;
   rol: string;
   idMedico: number | null;
+  idPaciente: number | null;
 }
