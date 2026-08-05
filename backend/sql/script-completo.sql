@@ -375,7 +375,10 @@ VALUES
 (3, 'dr.gomez@sgmp.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true),
 (4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
 (4, '1100789012', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
-(4, '1100345678', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
+(4, '1100345678', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
+(4, 'paciente1@sgmp.com', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
+(4, 'paciente2@sgmp.com', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
+(4, 'paciente3@sgmp.com', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
 
 INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
 VALUES 
@@ -387,7 +390,10 @@ INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacim
 VALUES 
 (6, '1100123456', 'Juan', 'Pérez Ramírez', '0999123456', '1990-05-15'),
 (7, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22'),
-(8, '1100345678', 'Luis', 'Martínez Silva', '0999345678', '1995-12-10');
+(8, '1100345678', 'Luis', 'Martínez Silva', '0999345678', '1995-12-10'),
+(9, '2200111111', 'Carlos', 'Ruiz Benites', '0999111111', '1992-03-10'),
+(10, '2200222222', 'Sofia', 'Castillo Mendoza', '0999222222', '1994-07-18'),
+(11, '2200333333', 'Miguel', 'Vargas Torres', '0999333333', '1988-11-25');
 
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES 

@@ -70,6 +70,9 @@ Puedes ingresar tanto en la web como en la app móvil con las siguientes cuentas
 | Paciente       | 1100123456             | 1100123456     |
 | Paciente       | 1100789012             | 1100789012     |
 | Paciente       | 1100345678             | 1100345678     |
+| Paciente       | paciente1@sgmp.com     | 1100123456     |
+| Paciente       | paciente2@sgmp.com     | 1100789012     |
+| Paciente       | paciente3@sgmp.com     | 1100345678     |
 
 ---
 

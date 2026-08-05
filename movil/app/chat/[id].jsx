@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { api } from '../../src/api';
 import { useAuth } from '../../src/auth';
@@ -75,52 +76,54 @@ export default function Conversacion() {
   if (cargando) return <Cargando />;
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colores.fondo }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}
-    >
-      <FlatList
-        ref={lista}
-        data={mensajes}
-        keyExtractor={(m, i) => String(m.id || i)}
-        contentContainerStyle={{ padding: esp.md }}
-        onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
-        ListHeaderComponent={<Aviso mensaje={error} />}
-        renderItem={({ item }) => {
-          if (item.tipo === 'sistema') {
+    <SafeAreaView style={{ flex: 1, backgroundColor: colores.fondo }} edges={['bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        <FlatList
+          ref={lista}
+          data={mensajes}
+          keyExtractor={(m, i) => String(m.id || i)}
+          contentContainerStyle={{ padding: esp.md }}
+          onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
+          ListHeaderComponent={<Aviso mensaje={error} />}
+          renderItem={({ item }) => {
+            if (item.tipo === 'sistema') {
+              return (
+                <View style={s.sistema}>
+                  <Text style={s.sistemaTexto}>{item.texto}</Text>
+                </View>
+              );
+            }
+            const propio = String(item.idEmisor) === String(usuario?.id);
             return (
-              <View style={s.sistema}>
-                <Text style={s.sistemaTexto}>{item.texto}</Text>
+              <View style={[s.burbuja, propio ? s.propia : s.ajena]}>
+                {!propio ? <Text style={s.remitente}>{item.remitenteNombre || 'Usuario'}</Text> : null}
+                <Text style={[s.texto, propio && { color: '#fff' }]}>{item.texto}</Text>
+                <Text style={[s.hora, propio && { color: '#ffffffaa' }]}>{formatoHora(item.fecha)}</Text>
               </View>
             );
-          }
-          const propio = String(item.idEmisor) === String(usuario?.id);
-          return (
-            <View style={[s.burbuja, propio ? s.propia : s.ajena]}>
-              {!propio ? <Text style={s.remitente}>{item.remitenteNombre || 'Usuario'}</Text> : null}
-              <Text style={[s.texto, propio && { color: '#fff' }]}>{item.texto}</Text>
-              <Text style={[s.hora, propio && { color: '#ffffffaa' }]}>{formatoHora(item.fecha)}</Text>
-            </View>
-          );
-        }}
-      />
-
-      <View style={s.barra}>
-        <TextInput
-          style={s.entrada}
-          value={texto}
-          onChangeText={setTexto}
-          placeholder="Escribe un mensaje"
-          placeholderTextColor={colores.textoSuave}
-          multiline
-          onSubmitEditing={enviar}
+          }}
         />
-        <Pressable onPress={enviar} style={s.enviar}>
-          <Text style={s.enviarTexto}>Enviar</Text>
-        </Pressable>
-      </View>
-    </KeyboardAvoidingView>
+
+        <View style={s.barra}>
+          <TextInput
+            style={s.entrada}
+            value={texto}
+            onChangeText={setTexto}
+            placeholder="Escribe un mensaje"
+            placeholderTextColor={colores.textoSuave}
+            multiline
+            onSubmitEditing={enviar}
+          />
+          <Pressable onPress={enviar} style={s.enviar}>
+            <Text style={s.enviarTexto}>Enviar</Text>
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
