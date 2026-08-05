@@ -47,7 +47,7 @@ export default class AdminReportesComponent {
     if (!this.fechaInicio() || !this.fechaFin()) return;
     const token = localStorage.getItem('token') || '';
     const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
-    const url = `${environment.apiBaseUrl}/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}`;
+    const url = `${environment.apiUrl}/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}`;
     this.http.get(url, { headers, responseType: 'blob' }).subscribe({
       next: (blob: Blob) => {
         const link = document.createElement('a');
@@ -71,9 +71,9 @@ export default class AdminReportesComponent {
     }
     this.loading.set(true);
     this.pagosSvc.getReporte(this.fechaInicio(), this.fechaFin()).subscribe({
-      next: (data: Pago[]) => {
+      next: (data: any[]) => {
         this.pagos.set(data);
-        this.total.set(data.reduce((acc: number, p: Pago) => acc + Number(p.Monto), 0));
+        this.total.set(data.reduce((acc: number, p: any) => acc + Number(p.Monto), 0));
         this.showReporte.set(true);
         this.loading.set(false);
       },

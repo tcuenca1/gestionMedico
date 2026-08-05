@@ -37,12 +37,23 @@ export default class RecepcionDashboardComponent {
   cargarTodo(): void {
     this.loading.set(true);
     const fecha = this.fechaSeleccionada();
-    this.dashSvc.getStats(fecha).subscribe((data) => {
-      this.stats.set(data);
+    this.dashSvc.getStats(fecha).subscribe({
+      next: (data) => {
+        this.stats.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      },
     });
-    this.citasSvc.getByDate(fecha).subscribe((data) => {
-      this.citas.set(data);
-      this.loading.set(false);
+    this.citasSvc.getByDate(fecha).subscribe({
+      next: (data) => {
+        this.citas.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      },
     });
   }
 

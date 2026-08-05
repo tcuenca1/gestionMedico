@@ -137,6 +137,7 @@ export class ChatService {
             m.nombre ||
             m.Username_Correo ||
             m.username_correo ||
+            m.Rol ||
             null,
         }));
         console.log('[Chat] mensajes cargados', mapeados.length);
