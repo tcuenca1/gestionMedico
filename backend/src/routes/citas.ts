@@ -19,8 +19,11 @@ router.get('/', authenticateToken, async (req: any, res: any) => {
 
     let query = `
       SELECT c.*,
-             p.Nombres AS Paciente_Nombres, p.Apellidos AS Paciente_Apellidos, p.DNI AS Paciente_DNI, p.Telefono AS Paciente_Telefono,
-             m.Nombres AS Medico_Nombres, m.Apellidos AS Medico_Apellidos, e.Nombre_Especialidad
+             p.Nombres AS Paciente_Nombres, p.Apellidos AS Paciente_Apellidos,
+             (p.Nombres || ' ' || p.Apellidos) AS Paciente_Nombre,
+             m.Nombres AS Medico_Nombres, m.Apellidos AS Medico_Apellidos,
+             (m.Nombres || ' ' || m.Apellidos) AS Medico_Nombre,
+             e.Nombre_Especialidad AS Especialidad
       FROM Cita c
       JOIN Paciente p ON c.ID_Paciente = p.ID_Paciente
       JOIN Medico m ON c.ID_Medico = m.ID_Medico
