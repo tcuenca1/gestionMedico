@@ -66,8 +66,10 @@ Puedes ingresar tanto en la web como en la app móvil con las siguientes cuentas
 | Recepcionista  | recepcion@sgmp.com     | recepcion123   |
 | Médico         | dr.paredes@sgmp.com    | medico123      |
 | Médico         | dra.lopez@sgmp.com     | medico123      |
-| Paciente       | 1100123456             | paciente123    |
-| Paciente       | 1100789012             | paciente123    |
+| Médico         | dr.gomez@sgmp.com      | medico123      |
+| Paciente       | 1100123456             | 1100123456     |
+| Paciente       | 1100789012             | 1100789012     |
+| Paciente       | 1100345678             | 1100345678     |
 
 ---
 

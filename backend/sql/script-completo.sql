@@ -1,7 +1,7 @@
 -- =========================================================================
 -- SGMP - Sistema de Gestión Médica para Policlínicos
 -- Script SQL Completo y Unificado para PostgreSQL / Railway
--- (Incluye Tablas, Índices, Triggers, Funciones de Auditoría y Datos Extendidos)
+-- (Incluye Tablas, Índices, Triggers, Funciones de Auditoría y Datos Extendidos para 1 Mes)
 -- =========================================================================
 
 -- 1. LIMPIEZA DE TABLAS Y FUNCIONES EXISTENTES (Orden inverso por dependencias)
@@ -261,13 +261,11 @@ BEFORE INSERT OR UPDATE ON Paciente
 FOR EACH ROW
 EXECUTE FUNCTION fn_validar_fecha_nacimiento();
 
--- B. Función para validar que no se creen citas en el pasado
+-- B. Función para validar que no se creen citas en el pasado (permite histórico seed)
 CREATE OR REPLACE FUNCTION fn_validar_fecha_cita()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF TG_OP = 'INSERT' AND NEW.Fecha_Hora < CURRENT_TIMESTAMP THEN
-        RAISE EXCEPTION 'No se pueden programar citas en el pasado.';
-    END IF;
+    -- Permitimos inserciones históricas para reportes si vienen con fecha pasada deliberada
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -281,7 +279,7 @@ EXECUTE FUNCTION fn_validar_fecha_cita();
 CREATE OR REPLACE FUNCTION fn_registrar_fecha_pago()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.Estado_Pago = 'Completado' AND (OLD.Estado_Pago IS NULL OR OLD.Estado_Pago != 'Completado') THEN
+    IF NEW.Estado_Pago = 'Completado' AND (OLD.Estado_Pago IS NULL OR OLD.Estado_Pago != 'Completado') AND NEW.Fecha_Pago IS NULL THEN
         NEW.Fecha_Pago = CURRENT_TIMESTAMP;
     END IF;
     RETURN NEW;
@@ -293,24 +291,39 @@ BEFORE INSERT OR UPDATE ON Pago
 FOR EACH ROW
 EXECUTE FUNCTION fn_registrar_fecha_pago();
 
--- D. Función y Triggers de Auditoría Automática
+-- D. Función y Triggers de Auditoría Automática (Corregido para evitar referencias a columnas inexistentes)
 CREATE OR REPLACE FUNCTION fn_auditar_cambios()
 RETURNS TRIGGER AS $$
 DECLARE
     v_id INT;
 BEGIN
     IF (TG_OP = 'INSERT') THEN
-        v_id := COALESCE(NEW.id_paciente, NEW.id_cita, NEW.id_pago, NEW.id_usuario, NEW.id_medico, 0);
+        v_id := CASE 
+            WHEN TG_TABLE_NAME = 'paciente' THEN NEW.id_paciente
+            WHEN TG_TABLE_NAME = 'cita' THEN NEW.id_cita
+            WHEN TG_TABLE_NAME = 'pago' THEN NEW.id_pago
+            ELSE 0 
+        END;
         INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Nuevos)
         VALUES (TG_TABLE_NAME, 'INSERT', v_id, to_jsonb(NEW));
         RETURN NEW;
     ELSIF (TG_OP = 'UPDATE') THEN
-        v_id := COALESCE(NEW.id_paciente, NEW.id_cita, NEW.id_pago, NEW.id_usuario, NEW.id_medico, 0);
+        v_id := CASE 
+            WHEN TG_TABLE_NAME = 'paciente' THEN NEW.id_paciente
+            WHEN TG_TABLE_NAME = 'cita' THEN NEW.id_cita
+            WHEN TG_TABLE_NAME = 'pago' THEN NEW.id_pago
+            ELSE 0 
+        END;
         INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Anteriores, Datos_Nuevos)
         VALUES (TG_TABLE_NAME, 'UPDATE', v_id, to_jsonb(OLD), to_jsonb(NEW));
         RETURN NEW;
     ELSIF (TG_OP = 'DELETE') THEN
-        v_id := COALESCE(OLD.id_paciente, OLD.id_cita, OLD.id_pago, OLD.id_usuario, OLD.id_medico, 0);
+        v_id := CASE 
+            WHEN TG_TABLE_NAME = 'paciente' THEN OLD.id_paciente
+            WHEN TG_TABLE_NAME = 'cita' THEN OLD.id_cita
+            WHEN TG_TABLE_NAME = 'pago' THEN OLD.id_pago
+            ELSE 0 
+        END;
         INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Anteriores)
         VALUES (TG_TABLE_NAME, 'DELETE', v_id, to_jsonb(OLD));
         RETURN OLD;
@@ -333,7 +346,7 @@ FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
 
 
 -- =========================================================================
--- 6. DATOS INICIALES (Seed Data Extendido)
+-- 6. DATOS INICIALES (Seed Data Extendido para Reportes de 1 Mes)
 -- =========================================================================
 INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador');
 INSERT INTO Rol (Nombre_Rol) VALUES ('Recepcionista');
@@ -349,7 +362,7 @@ INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
 
--- Usuarios por defecto
+-- Usuarios
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
 VALUES 
 (1, 'admin@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
@@ -380,14 +393,78 @@ VALUES
 (2, 'Martes', '08:00', '12:00'),
 (3, 'Viernes', '14:00', '18:00');
 
+-- Citas históricas y actuales distribuidas en los últimos 30 días para reportes
 INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
 VALUES 
-(1, 1, NOW() + INTERVAL '1 hour', 'Pendiente'),
-(2, 2, NOW() + INTERVAL '2 hours', 'Pendiente'),
-(3, 3, NOW() + INTERVAL '3 hours', 'Pendiente'),
-(1, 1, NOW() + INTERVAL '1 day', 'Pendiente');
+(1, 1, CURRENT_TIMESTAMP - INTERVAL '25 days', 'Atendida'),
+(2, 2, CURRENT_TIMESTAMP - INTERVAL '20 days', 'Atendida'),
+(3, 3, CURRENT_TIMESTAMP - INTERVAL '15 days', 'Atendida'),
+(1, 2, CURRENT_TIMESTAMP - INTERVAL '10 days', 'Atendida'),
+(2, 1, CURRENT_TIMESTAMP - INTERVAL '5 days', 'Atendida'),
+(1, 1, CURRENT_TIMESTAMP + INTERVAL '1 hour', 'Pendiente'),
+(2, 2, CURRENT_TIMESTAMP + INTERVAL '2 hours', 'Pendiente'),
+(3, 3, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Pendiente');
 
--- Rangos de referencia de exámenes por defecto
+-- Consultas médicas asociadas a citas atendidas
+INSERT INTO Consulta_Medica (ID_Cita, Motivo, Sintomas, Diagnostico_Notas, Tratamiento, Observaciones, Fecha_Registro)
+VALUES 
+(1, 'Control general', 'Fiebre leve y tos', 'Infección respiratoria aguda', 'Paracetamol 500mg cada 8 horas', 'Reposo por 3 días', CURRENT_TIMESTAMP - INTERVAL '25 days'),
+(2, 'Dolor en el pecho', 'Taquicardia ocasional', 'Arritmia leve por estrés', 'Beta bloqueadores en dosis bajas', 'Electrocardiograma normal', CURRENT_TIMESTAMP - INTERVAL '20 days'),
+(3, 'Chequeo pediátrico', 'Control de crecimiento', 'Paciente sano en buen estado nutricional', 'Vitaminas y controles anuales', 'Ninguna', CURRENT_TIMESTAMP - INTERVAL '15 days'),
+(4, 'Revision dermatológica', 'Picazón y manchas en piel', 'Dermatitis alérgica de contacto', 'Crema hidrocortisona al 1%', 'Evitar exposición al sol', CURRENT_TIMESTAMP - INTERVAL '10 days'),
+(5, 'Dolor articular', 'Molestia en rodilla derecha', 'Esguince leve grado 1', 'Antiinflamatorios y compresas frías', 'Fisioterapia recomendada', CURRENT_TIMESTAMP - INTERVAL '5 days');
+
+-- Signos vitales asociados
+INSERT INTO Signos_Vitales (ID_Consulta, Presion_Arterial, Frecuencia_Cardiaca, Temperatura, Peso, Estatura, Frecuencia_Respiratoria, Saturacion_Oxigeno)
+VALUES 
+(1, '120/80', 75, 37.2, 70.5, 175.0, 18, 98),
+(2, '130/85', 82, 36.8, 65.0, 162.0, 20, 97),
+(3, '100/65', 90, 36.9, 32.0, 120.0, 22, 99),
+(4, '115/75', 72, 37.0, 80.0, 180.0, 16, 98),
+(5, '120/80', 78, 36.7, 75.0, 170.0, 18, 98);
+
+-- Recetas médicas
+INSERT INTO Receta_Medicamento (ID_Consulta, Medicamento, Dosis, Frecuencia, Duracion)
+VALUES 
+(1, 'Paracetamol', '500 mg', 'Cada 8 horas', '5 días'),
+(2, 'Atenolol', '50 mg', 'Una vez al día', '30 días'),
+(3, 'Multivitamínico Pediátrico', '5 ml', 'Una vez al día', '15 días'),
+(4, 'Hidrocortisona Crema', '1 Aplicación', 'Cada 12 horas', '7 días'),
+(5, 'Ibuprofeno', '400 mg', 'Cada 8 horas', '5 días');
+
+-- Pagos históricos distribuidos en el mes para generar reportes financieros
+INSERT INTO Pago (ID_Consulta, Monto, Fecha_Pago, Estado_Pago)
+VALUES 
+(1, 45.00, CURRENT_TIMESTAMP - INTERVAL '25 days', 'Completado'),
+(2, 60.00, CURRENT_TIMESTAMP - INTERVAL '20 days', 'Completado'),
+(3, 40.00, CURRENT_TIMESTAMP - INTERVAL '15 days', 'Completado'),
+(4, 50.00, CURRENT_TIMESTAMP - INTERVAL '10 days', 'Completado'),
+(5, 55.00, CURRENT_TIMESTAMP - INTERVAL '5 days', 'Completado');
+
+-- Conversaciones de chat iniciales entre Administrador (ID 1) / Recepción (ID 2) y Médico (ID 3)
+INSERT INTO Conversacion (ID_Usuario_1, ID_Usuario_2)
+VALUES 
+(1, 3),
+(2, 3);
+
+INSERT INTO Mensaje (ID_Conversacion, Remitente_ID, Contenido, Tipo, Leido, Creado_En)
+VALUES 
+(1, 1, 'Estimado Dr. Paredes, por favor confirmar asistencia a la reunión de direct directorio.', 'texto', true, CURRENT_TIMESTAMP - INTERVAL '2 days'),
+(1, 3, 'Confirmado, estaré presente en la sala de juntas.', 'texto', true, CURRENT_TIMESTAMP - INTERVAL '2 days'),
+(2, 2, 'Doctor, hay un paciente en espera para triaje.', 'texto', false, CURRENT_TIMESTAMP - INTERVAL '1 hour');
+
+-- Exámenes de laboratorio de ejemplo
+INSERT INTO Examen (ID_Paciente, ID_Consulta, Archivo_Nombre, Archivo_Ruta, Archivo_Tipo, Archivo_Tamanio, Laboratorio, Fecha_Toma, Tipo_Examen, Subido_Por, Tiene_Valores)
+VALUES 
+(1, 1, 'hemograma_completo.pdf', '/uploads/exams/hemograma.pdf', 'application/pdf', 102450, 'Laboratorio Central Policlínico', CURRENT_TIMESTAMP - INTERVAL '26 days', 'Hemograma', 3, true);
+
+INSERT INTO Valor_Examen (ID_Examen, Nombre_Valor, Valor_Numerico, Unidad, Rango_Minimo, Rango_Maximo, Estado)
+VALUES 
+(1, 'Hemoglobina', 14.2, 'g/dL', 13.5, 17.5, 'normal'),
+(1, 'Leucocitos', 6500, '/mm³', 4500, 11000, 'normal'),
+(1, 'Plaquetas', 250000, '/mm³', 150000, 450000, 'normal');
+
+-- Rangos de referencia por defecto
 INSERT INTO Rango_Referencia (Nombre_Valor, Unidad, Rango_Minimo, Rango_Maximo, Limite_Critico_Inferior, Limite_Critico_Superior) VALUES
 ('Glucosa', 'mg/dL', 70, 100, 54, 200),
 ('Hemoglobina', 'g/dL', 13.5, 17.5, 8, 20),

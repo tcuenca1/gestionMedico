@@ -1,11 +1,29 @@
+# Dependencias de compilación y artefactos de TypeScript
 node_modules/
 dist/
+build/
 .angular/
+.expo/
+*.tsbuildinfo
+
+# Entorno y Secretos
 .env
 .env.local
+.env.production
+*.env
+
+# Logs y Archivos temporales
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 *.log
+ip.txt
+
+# Sistema operativo e IDE
 .DS_Store
 Thumbs.db
-backend/.env
-
-.vercel
+.vscode/
+.idea/
+*.swp
+*.swo
