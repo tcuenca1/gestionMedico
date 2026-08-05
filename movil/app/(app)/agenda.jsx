@@ -167,7 +167,7 @@ export default function Agenda() {
         )}
       />
 
-      {esPaciente || esRecepcion ? (
+      {esRecepcion || esAdmin ? (
         <View style={s.flotante}>
           <Boton titulo="+ Nueva cita" onPress={() => router.push('/cita/nueva')} />
         </View>

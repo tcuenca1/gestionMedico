@@ -64,15 +64,15 @@ Puedes ingresar tanto en la web como en la app móvil con las siguientes cuentas
 |----------------|------------------------|----------------|
 | Administrador  | admin@sgmp.com         | admin123       |
 | Recepcionista  | recepcion@sgmp.com     | recepcion123   |
-| Médico         | dr.paredes@sgmp.com    | admin123       |
-| Médico         | dra.lopez@sgmp.com     | admin123       |
-| Médico         | dr.gomez@sgmp.com      | admin123       |
-| Paciente       | 1100123456             | admin123       |
-| Paciente       | 1100789012             | admin123       |
-| Paciente       | 1100345678             | admin123       |
-| Paciente       | paciente1@sgmp.com     | admin123       |
-| Paciente       | paciente2@sgmp.com     | admin123       |
-| Paciente       | paciente3@sgmp.com     | admin123       |
+| Médico         | dr.paredes@sgmp.com    | medico123      |
+| Médico         | dra.lopez@sgmp.com     | medico123      |
+| Médico         | dr.gomez@sgmp.com      | medico123      |
+| Paciente       | 1100123456             | paciente123    |
+| Paciente       | 1100789012             | paciente123    |
+| Paciente       | 1100345678             | paciente123    |
+| Paciente       | paciente1@sgmp.com     | pacientesgmp1  |
+| Paciente       | paciente2@sgmp.com     | pacientesgmp2  |
+| Paciente       | paciente3@sgmp.com     | pacientesgmp3  |
 
 ---
 

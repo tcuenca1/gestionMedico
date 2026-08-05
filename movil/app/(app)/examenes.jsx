@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { api } from '../../src/api';
 import { useAuth } from '../../src/auth';
-import { Aviso, Boton, Cargando, Insignia, Tarjeta, Vacio } from '../../src/ui';
+import { Aviso, Cargando, Insignia, Tarjeta, Vacio } from '../../src/ui';
 import { colores, colorEstadoValor, esp } from '../../src/theme';
 import { formatoLargo } from '../../src/fechas';
 
@@ -59,14 +59,6 @@ export default function MisExamenes() {
           </Tarjeta>
         )}
       />
-      <View style={s.flotante}>
-        <Boton
-          titulo="+ Subir examen"
-          onPress={() =>
-            router.push({ pathname: '/examen/subir', params: { idPaciente: usuario?.idPaciente } })
-          }
-        />
-      </View>
     </View>
   );
 }
@@ -76,6 +68,5 @@ const s = StyleSheet.create({
   nombre: { fontWeight: '700', fontSize: 16, color: colores.texto, flex: 1 },
   detalle: { color: colores.textoSuave, fontSize: 13, marginTop: 2 },
   resumen: { color: colores.texto, marginTop: esp.sm, fontSize: 14, lineHeight: 20 },
-  pendiente: { color: colores.aviso, marginTop: esp.sm, fontSize: 13, fontStyle: 'italic' },
-  flotante: { position: 'absolute', left: esp.md, right: esp.md, bottom: esp.md }
+  pendiente: { color: colores.aviso, marginTop: esp.sm, fontSize: 13, fontStyle: 'italic' }
 });

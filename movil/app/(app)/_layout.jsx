@@ -62,7 +62,7 @@ export default function LayoutTabs() {
         name="chat"
         options={{
           title: 'Chat',
-          href: ver(!esPaciente),
+          href: ver(esPaciente),
           tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" color={color} size={size} />
         }}
       />
