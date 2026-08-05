@@ -63,9 +63,10 @@ export default class RecepcionDashboardComponent {
   }
 
   marcarEnEspera(id: number): void {
-    this.citasSvc.updateEstado(id, 'En Espera').subscribe(() =>
-      this.cargarTodo(),
-    );
+    this.citasSvc.updateEstado(id, 'En Espera').subscribe({
+      next: () => this.cargarTodo(),
+      error: () => this.loading.set(false)
+    });
   }
 
   getBadgeClass(estado: string): string {

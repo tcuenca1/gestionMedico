@@ -45,16 +45,28 @@ export default class AdminEspecialidadesComponent {
   save(): void {
     this.loading.set(true);
     if (this.editing() && this.selectedId()) {
-      this.espSvc.update(this.selectedId()!, { Nombre_Especialidad: this.nombre() }).subscribe(() => {
-        this.loading.set(false);
-        this.showForm.set(false);
-        this.espSvc.getAll().subscribe((data) => this.especialidades.set(data));
+      this.espSvc.update(this.selectedId()!, { Nombre_Especialidad: this.nombre() }).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.showForm.set(false);
+          this.espSvc.getAll().subscribe((data) => this.especialidades.set(data));
+        },
+        error: () => {
+          this.loading.set(false);
+          this.notif.error('Error al actualizar especialidad');
+        }
       });
     } else {
-      this.espSvc.create({ Nombre_Especialidad: this.nombre() } as Especialidad).subscribe(() => {
-        this.loading.set(false);
-        this.showForm.set(false);
-        this.espSvc.getAll().subscribe((data) => this.especialidades.set(data));
+      this.espSvc.create({ Nombre_Especialidad: this.nombre() } as Especialidad).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.showForm.set(false);
+          this.espSvc.getAll().subscribe((data) => this.especialidades.set(data));
+        },
+        error: () => {
+          this.loading.set(false);
+          this.notif.error('Error al crear especialidad');
+        }
       });
     }
   }

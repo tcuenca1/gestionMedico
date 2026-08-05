@@ -42,37 +42,48 @@ export class ChatService {
     });
 
     this.socket.on('mensaje:nuevo', (msg: Mensaje) => {
-      console.log('[Chat] mensaje:nuevo recibido', { id: msg.id, tipo: msg.tipo, convId: msg.conversacion_id, paraId: msg.para_usuario_id, userId: this._userId });
+      const mapeado: Mensaje = {
+        ...msg,
+        remitente_nombre:
+          msg.remitente_nombre ||
+          (msg as any).Remitente_Nombre ||
+          (msg as any).usuario_nombre ||
+          (msg as any).Usuario_Nombre ||
+          (msg as any).Nombre ||
+          (msg as any).nombre ||
+          (msg as any).Username_Correo ||
+          (msg as any).username_correo ||
+          null,
+      };
       const convActual = this.conversacionActiva();
-      const esConvActiva = convActual && msg.conversacion_id === convActual.id;
+      const esConvActiva = convActual && mapeado.conversacion_id === convActual.id;
 
       if (esConvActiva) {
         this.mensajes.update((m) => {
-          if (m.some((x) => x.id === msg.id)) return m;
-          return [...m, msg];
+          if (m.some((x) => x.id === mapeado.id)) return m;
+          return [...m, mapeado];
         });
-        if (msg.remitente_id !== null) {
+        if (mapeado.remitente_id !== null) {
           this.socket?.emit('conversacion:abrir', { conversacion_id: convActual.id });
         }
       } else {
         this.noLeidos.update((n) => n + 1);
-        if (msg.remitente_id !== null && msg.remitente_id !== this._userId) {
-          const conv = this.conversaciones().find((c) => c.id === msg.conversacion_id);
+        if (mapeado.remitente_id !== null && mapeado.remitente_id !== this._userId) {
+          const conv = this.conversaciones().find((c) => c.id === mapeado.conversacion_id);
           if (conv) {
             this.toast.mostrar({
               tipo: 'mensaje',
               titulo: conv.otro_usuario.nombre,
-              cuerpo: msg.contenido,
-              conversacion_id: msg.conversacion_id,
+              cuerpo: mapeado.contenido,
+              conversacion_id: mapeado.conversacion_id,
             });
           }
-        } else if (msg.tipo === 'sistema' && (!msg.para_usuario_id || msg.para_usuario_id === this._userId)) {
-          console.log('[Chat] Mostrando toast sistema para usuario', this._userId);
+        } else if (mapeado.tipo === 'sistema' && (!mapeado.para_usuario_id || mapeado.para_usuario_id === this._userId)) {
           this.toast.mostrar({
             tipo: 'cita',
             titulo: 'Notificación del sistema',
-            cuerpo: msg.contenido,
-            conversacion_id: msg.conversacion_id,
+            cuerpo: mapeado.contenido,
+            conversacion_id: mapeado.conversacion_id,
           });
         }
       }

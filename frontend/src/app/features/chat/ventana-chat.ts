@@ -41,7 +41,7 @@ import { ChatService } from './chat.service';
                 <div>
                   <div class="d-flex align-items-center gap-2 mb-1" [class.flex-row-reverse]="esPropio(msg)">
                     <span class="fw-semibold" style="font-size:0.7rem;">{{ msg.remitente_nombre || 'Usuario' }}</span>
-                    <span class="text-muted" style="font-size:0.6rem;">{{ msg.creado_en | date:'HH:mm' }}</span>
+                    <span class="text-muted" style="font-size:0.6rem;">{{ msg.creado_en | date:'HH:mm':'':'es-PE' }}</span>
                   </div>
                   <div class="chat-burbuja" [class.propio]="esPropio(msg)" [class.ajeno]="!esPropio(msg)">
                     {{ msg.contenido }}
