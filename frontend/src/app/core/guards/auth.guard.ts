@@ -10,7 +10,7 @@ const HOME_BY_ROLE: Record<string, string> = {
 };
 
 const PREFIX_BY_ROLE: Record<string, string[]> = {
-  administrador: ['/admin'],
+  administrador: ['/admin', '/recepcion', '/medico'],
   recepcionista: ['/recepcion'],
   medico: ['/medico'],
 };

@@ -46,8 +46,8 @@ export default class AdminReportesComponent {
   downloadPdf(): void {
     if (!this.fechaInicio() || !this.fechaFin()) return;
     const token = localStorage.getItem('token') || '';
-    const url = `${environment.apiBaseUrl}/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}`;
     const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
+    const url = `${environment.apiBaseUrl}/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}`;
     this.http.get(url, { headers, responseType: 'blob' }).subscribe({
       next: (blob: Blob) => {
         const link = document.createElement('a');
