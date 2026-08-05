@@ -220,7 +220,11 @@ export const api = {
 
   // ----------------------------------------------------------------- chat
   async usuariosChat() {
-    return lista(await peticion('/chat/usuarios'));
+    return lista(await peticion('/chat/usuarios')).map(u => ({
+      id: u.id || u.ID_Usuario || u.idUsuario,
+      nombreCompleto: u.nombreCompleto || u.nombre || u.Username_Correo || u.username_correo || 'Usuario',
+      rol: u.rol || u.Rol || ''
+    }));
   },
   async conversaciones() {
     return lista(await peticion('/chat/conversaciones')).map(normConversacion);

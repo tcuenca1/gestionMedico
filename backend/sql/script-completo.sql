@@ -12,7 +12,7 @@ DROP TRIGGER IF EXISTS trg_validar_fecha_nacimiento ON Paciente;
 DROP TRIGGER IF EXISTS trg_validar_fecha_cita ON Cita;
 DROP TRIGGER IF EXISTS trg_registrar_fecha_pago ON Pago;
 
-DROP FUNCTION IF EXISTS fn_auditar_cambios();
+DROP FUNCTION IF EXISTS fn_auditar_cambios() CASCADE;
 DROP FUNCTION IF EXISTS fn_validar_fecha_nacimiento();
 DROP FUNCTION IF EXISTS fn_validar_fecha_cita();
 DROP FUNCTION IF EXISTS fn_registrar_fecha_pago();
@@ -365,20 +365,19 @@ INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
 
--- Usuarios
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
 VALUES 
-(1, 'admin@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(2, 'recepcion@sgmp.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true),
-(3, 'dr.paredes@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(3, 'dra.lopez@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(3, 'dr.gomez@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(4, '1100123456', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(4, '1100789012', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(4, '1100345678', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(4, 'paciente1@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(4, 'paciente2@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
-(4, 'paciente3@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
+(1, 'admin@sgmp.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(2, 'recepcion@sgmp.com', '$2b$10$E95R884T1W2a00N8.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(3, 'dr.paredes@sgmp.com', '$2b$10$S917I042a9831.u/M38f0.R891vJvB8FOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(3, 'dra.lopez@sgmp.com', '$2b$10$387Y09281Aa12.u/A891f.K891vJvB8FOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(3, 'dr.gomez@sgmp.com', '$2b$10$9827I042a9831.u/B128f.L891vJvB8FOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(4, 'juan3456', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(4, 'ana9012', '$2b$10$X871p9ba54e6kg/B891OAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(4, 'luis5678', '$2b$10$M981p9ba54e6kg/C123OAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(4, 'carlos1111', '$2b$10$P821p9ba54e6kg/D456OAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(4, 'sofia2222', '$2b$10$K712p9ba54e6kg/E789OAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(4, 'miguel3333', '$2b$10$R901p9ba54e6kg/F012OAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
 
 INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
 VALUES 

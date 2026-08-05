@@ -23,11 +23,6 @@
               @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
               Generar Reporte
             </button>
-            @if (showReporte()) {
-              <button class="btn btn-danger" (click)="downloadPdf()">
-                📥 Descargar PDF
-              </button>
-            }
           </div>
         </div>
         @if (errorMsg()) {

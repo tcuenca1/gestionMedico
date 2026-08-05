@@ -43,25 +43,6 @@ export default class AdminReportesComponent {
     this.generateReporte();
   }
 
-  downloadPdf(): void {
-    if (!this.fechaInicio() || !this.fechaFin()) return;
-    const token = localStorage.getItem('token') || '';
-    const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
-    const url = `${environment.apiBaseUrl}/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}`;
-    this.http.get(url, { headers, responseType: 'blob' }).subscribe({
-      next: (blob: Blob) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `reporte-pagos_${this.fechaInicio()}_${this.fechaFin()}.pdf`;
-        link.click();
-        URL.revokeObjectURL(link.href);
-      },
-      error: () => {
-        this.errorMsg.set('Error al descargar el PDF del reporte');
-      },
-    });
-  }
-
   generateReporte(): void {
     this.errorMsg.set('');
     if (!this.fechaInicio() || !this.fechaFin()) return;

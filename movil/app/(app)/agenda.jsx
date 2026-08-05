@@ -110,7 +110,7 @@ export default function Agenda() {
           <RefreshControl refreshing={refrescando} onRefresh={() => { setRefrescando(true); cargar(); }} />
         }
         ListHeaderComponent={<Aviso mensaje={error} />}
-        ListEmptyComponent={<Vacio texto="No hay citas para mostrar." />}
+        ListEmptyComponent={error ? null : <Vacio texto="No hay citas para mostrar." />}
         renderItem={({ item }) => (
           <Tarjeta>
             <View style={s.fila}>
