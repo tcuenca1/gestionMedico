@@ -1,18 +1,23 @@
 -- =========================================================================
 -- SGMP - Sistema de Gestión Médica para Policlínicos
 -- Script SQL Completo y Unificado para PostgreSQL / Railway
--- (Incluye Tablas, Índices, Triggers, Funciones y Datos Iniciales)
+-- (Incluye Tablas, Índices, Triggers, Funciones de Auditoría y Datos Extendidos)
 -- =========================================================================
 
 -- 1. LIMPIEZA DE TABLAS Y FUNCIONES EXISTENTES (Orden inverso por dependencias)
-DROP TRIGGER IF EXISTS trg_validar_fecha_cita ON Cita;
+DROP TRIGGER IF EXISTS trg_auditar_paciente ON Paciente;
+DROP TRIGGER IF EXISTS trg_auditar_cita ON Cita;
+DROP TRIGGER IF EXISTS trg_auditar_pago ON Pago;
 DROP TRIGGER IF EXISTS trg_validar_fecha_nacimiento ON Paciente;
+DROP TRIGGER IF EXISTS trg_validar_fecha_cita ON Cita;
 DROP TRIGGER IF EXISTS trg_registrar_fecha_pago ON Pago;
 
-DROP FUNCTION IF EXISTS fn_validar_fecha_cita();
+DROP FUNCTION IF EXISTS fn_auditar_cambios();
 DROP FUNCTION IF EXISTS fn_validar_fecha_nacimiento();
+DROP FUNCTION IF EXISTS fn_validar_fecha_cita();
 DROP FUNCTION IF EXISTS fn_registrar_fecha_pago();
 
+DROP TABLE IF EXISTS Auditoria_Log CASCADE;
 DROP TABLE IF EXISTS Log_Acceso_Sensible CASCADE;
 DROP TABLE IF EXISTS Valor_Examen CASCADE;
 DROP TABLE IF EXISTS Rango_Referencia CASCADE;
@@ -90,8 +95,7 @@ CREATE TABLE Cita (
     Estado VARCHAR(20) DEFAULT 'Pendiente'
         CHECK (Estado IN ('Pendiente', 'En Espera', 'Cancelada', 'Reprogramada', 'Atendida')),
     FOREIGN KEY (ID_Paciente) REFERENCES Paciente(ID_Paciente) ON DELETE CASCADE,
-    FOREIGN KEY (ID_Medico) REFERENCES Medico(ID_Medico) ON DELETE CASCADE,
-    UNIQUE (ID_Medico, Fecha_Hora)
+    FOREIGN KEY (ID_Medico) REFERENCES Medico(ID_Medico) ON DELETE CASCADE
 );
 
 CREATE TABLE Consulta_Medica (
@@ -162,7 +166,7 @@ CREATE TABLE Mensaje (
 CREATE INDEX idx_mensaje_conversacion ON Mensaje(ID_Conversacion, Creado_En DESC);
 CREATE INDEX idx_mensaje_no_leido ON Mensaje(ID_Conversacion, Remitente_ID, Leido);
 
--- 4. MÓDULO DE EXÁMENES DE LABORATORIO
+-- 4. MÓDULO DE EXÁMENES DE LABORATORIO Y AUDITORÍA
 CREATE TABLE Examen (
     ID_Examen SERIAL PRIMARY KEY,
     ID_Paciente INT NOT NULL,
@@ -225,11 +229,23 @@ CREATE TABLE Rango_Referencia (
     Activo BOOLEAN DEFAULT TRUE
 );
 
+-- Tabla de Auditoría general para cambios en tablas sensibles
+CREATE TABLE Auditoria_Log (
+    ID_Auditoria SERIAL PRIMARY KEY,
+    Tabla_Afectada VARCHAR(100) NOT NULL,
+    Operacion VARCHAR(10) NOT NULL CHECK (Operacion IN ('INSERT', 'UPDATE', 'DELETE')),
+    ID_Registro INT,
+    ID_Usuario INT,
+    Datos_Anteriores JSONB,
+    Datos_Nuevos JSONB,
+    Fecha_Acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- =========================================================================
--- 5. FUNCIONES Y TRIGGERS DE VALIDACIÓN Y NEGOCIO
+-- 5. FUNCIONES Y TRIGGERS DE VALIDACIÓN, NEGOCIO Y AUDITORÍA
 -- =========================================================================
 
--- A. Función para validar que la fecha de nacimiento no sea futura
+-- A. Función para validar fecha de nacimiento
 CREATE OR REPLACE FUNCTION fn_validar_fecha_nacimiento()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -245,8 +261,7 @@ BEFORE INSERT OR UPDATE ON Paciente
 FOR EACH ROW
 EXECUTE FUNCTION fn_validar_fecha_nacimiento();
 
-
--- B. Función para validar que no se programen citas médicas en el pasado (al crear nuevas citas)
+-- B. Función para validar que no se creen citas en el pasado
 CREATE OR REPLACE FUNCTION fn_validar_fecha_cita()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -262,8 +277,7 @@ BEFORE INSERT ON Cita
 FOR EACH ROW
 EXECUTE FUNCTION fn_validar_fecha_cita();
 
-
--- C. Función para asignar automáticamente la fecha de pago actual
+-- C. Función para registrar fecha de pago
 CREATE OR REPLACE FUNCTION fn_registrar_fecha_pago()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -279,9 +293,47 @@ BEFORE INSERT OR UPDATE ON Pago
 FOR EACH ROW
 EXECUTE FUNCTION fn_registrar_fecha_pago();
 
+-- D. Función y Triggers de Auditoría Automática
+CREATE OR REPLACE FUNCTION fn_auditar_cambios()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_id INT;
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        v_id := COALESCE(NEW.id_paciente, NEW.id_cita, NEW.id_pago, NEW.id_usuario, NEW.id_medico, 0);
+        INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Nuevos)
+        VALUES (TG_TABLE_NAME, 'INSERT', v_id, to_jsonb(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        v_id := COALESCE(NEW.id_paciente, NEW.id_cita, NEW.id_pago, NEW.id_usuario, NEW.id_medico, 0);
+        INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Anteriores, Datos_Nuevos)
+        VALUES (TG_TABLE_NAME, 'UPDATE', v_id, to_jsonb(OLD), to_jsonb(NEW));
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        v_id := COALESCE(OLD.id_paciente, OLD.id_cita, OLD.id_pago, OLD.id_usuario, OLD.id_medico, 0);
+        INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Anteriores)
+        VALUES (TG_TABLE_NAME, 'DELETE', v_id, to_jsonb(OLD));
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_auditar_paciente
+AFTER INSERT OR UPDATE OR DELETE ON Paciente
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditar_cita
+AFTER INSERT OR UPDATE OR DELETE ON Cita
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditar_pago
+AFTER INSERT OR UPDATE OR DELETE ON Pago
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
 
 -- =========================================================================
--- 6. DATOS INICIALES (Seed Data)
+-- 6. DATOS INICIALES (Seed Data Extendido)
 -- =========================================================================
 INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador');
 INSERT INTO Rol (Nombre_Rol) VALUES ('Recepcionista');
@@ -297,63 +349,43 @@ INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
 
--- Usuarios por defecto (contraseñas hasheadas con bcrypt)
--- admin@sgmp.com / admin123
+-- Usuarios por defecto
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (1, 'admin@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
-
--- recepcion@sgmp.com / recepcion123
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (2, 'recepcion@sgmp.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true);
-
--- dr.paredes@sgmp.com / medico123
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (3, 'dr.paredes@sgmp.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true);
-
--- dra.lopez@sgmp.com / medico123
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (3, 'dra.lopez@sgmp.com', '$2b$10$FG2IBuDZjmOmR2RhweG19O7jO5467piPQur1bbpIlmJr.FOx.0Mze', true);
-
--- 1100123456 (Paciente 1) / 1100123456
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
-
--- 1100789012 (Paciente 2) / 1100789012
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (4, '1100789012', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
+VALUES 
+(1, 'admin@sgmp.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(2, 'recepcion@sgmp.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(3, 'dr.paredes@sgmp.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true),
+(3, 'dra.lopez@sgmp.com', '$2b$10$FG2IBuDZjmOmR2RhweG19O7jO5467piPQur1bbpIlmJr.FOx.0Mze', true),
+(3, 'dr.gomez@sgmp.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true),
+(4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
+(4, '1100789012', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
+(4, '1100345678', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
 
 INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
-VALUES (3, 1, 'Carlos', 'Paredes Molina', 'COL-12345');
-
-INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
-VALUES (4, 2, 'María', 'López García', 'COL-12346');
-
-INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento)
-VALUES (5, '1100123456', 'Juan', 'Pérez Ramírez', '0999123456', '1990-05-15');
+VALUES 
+(3, 1, 'Carlos', 'Paredes Molina', 'COL-12345'),
+(4, 2, 'María', 'López García', 'COL-12346'),
+(5, 3, 'Roberto', 'Gómez Bolaños', 'COL-12347');
 
 INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento)
-VALUES (6, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22');
+VALUES 
+(6, '1100123456', 'Juan', 'Pérez Ramírez', '0999123456', '1990-05-15'),
+(7, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22'),
+(8, '1100345678', 'Luis', 'Martínez Silva', '0999345678', '1995-12-10');
 
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Lunes', '08:00', '12:00');
+VALUES 
+(1, 'Lunes', '08:00', '12:00'),
+(1, 'Miércoles', '08:00', '12:00'),
+(2, 'Martes', '08:00', '12:00'),
+(3, 'Viernes', '14:00', '18:00');
 
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Lunes', '14:00', '17:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Miércoles', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Viernes', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (2, 'Martes', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (2, 'Jueves', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (2, 'Viernes', '14:00', '18:00');
+INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
+VALUES 
+(1, 1, NOW() + INTERVAL '1 hour', 'Pendiente'),
+(2, 2, NOW() + INTERVAL '2 hours', 'Pendiente'),
+(3, 3, NOW() + INTERVAL '3 hours', 'Pendiente'),
+(1, 1, NOW() + INTERVAL '1 day', 'Pendiente');
 
 -- Rangos de referencia de exámenes por defecto
 INSERT INTO Rango_Referencia (Nombre_Valor, Unidad, Rango_Minimo, Rango_Maximo, Limite_Critico_Inferior, Limite_Critico_Superior) VALUES
