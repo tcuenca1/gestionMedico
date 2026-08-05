@@ -15,7 +15,6 @@ const recepcionNav: NavItem[] = [
   { label: 'Dashboard', route: '/recepcion', icon: 'bi-speedometer2' },
   { label: 'Pacientes', route: '/recepcion/pacientes', icon: 'bi-people' },
   { label: 'Citas', route: '/recepcion/citas', icon: 'bi-calendar-check' },
-  { label: 'Pagos', route: '/recepcion/pagos', icon: 'bi-currency-dollar' },
 ];
 
 const medicoNav: NavItem[] = [
@@ -59,7 +58,6 @@ export const routes: Routes = [
       { path: '', loadComponent: () => import('./features/recepcion/dashboard/recepcion-dashboard') },
       { path: 'pacientes', loadComponent: () => import('./features/recepcion/pacientes/recepcion-pacientes') },
       { path: 'citas', loadComponent: () => import('./features/recepcion/citas/recepcion-citas') },
-      { path: 'pagos', loadComponent: () => import('./features/recepcion/pagos/recepcion-pagos') },
     ],
   },
   {

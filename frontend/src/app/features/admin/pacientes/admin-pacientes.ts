@@ -39,15 +39,6 @@ export default class AdminPacientesComponent {
     this.pacientesSvc.getAll().subscribe((data) => this.pacientes.set(data));
   }
 
-  search(): void {
-    const term = this.searchTerm().trim();
-    if (term) {
-      this.pacientesSvc.search(term).subscribe((data) => this.pacientes.set(data));
-    } else {
-      this.loadPacientes();
-    }
-  }
-
   openNew(): void {
     this.form = { ID_Paciente: 0, ID_Usuario: 0, DNI: '', Nombres: '', Apellidos: '', Telefono: '', Fecha_Nacimiento: '' };
     this.editing.set(false);

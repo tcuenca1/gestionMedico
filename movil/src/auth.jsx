@@ -42,6 +42,9 @@ export function ProveedorAuth({ children }) {
       idPaciente: r.idPaciente
     });
     sesion.rol = normRol(sesion.rolTexto || r.rol);
+    if (sesion.rol === ROLES.RECEPCION) {
+      throw new Error('El rol de Recepcionista no tiene acceso a la aplicacion movil.');
+    }
     await guardarSesion(token, sesion);
     setUsuario(sesion);
     await conectarSocket();

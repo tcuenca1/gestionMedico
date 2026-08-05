@@ -4,16 +4,6 @@
     <button class="btn btn-primary" (click)="openNew()">+ Nuevo Paciente</button>
   </div>
 
-  <div class="input-group mb-3">
-    <input
-      class="form-control"
-      placeholder="Buscar por DNI o Nombre..."
-      [(ngModel)]="searchTerm"
-      (keyup.enter)="search()"
-    />
-    <button class="btn btn-outline-secondary" (click)="search()">🔍</button>
-  </div>
-
   @if (showForm()) {
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white py-3">
