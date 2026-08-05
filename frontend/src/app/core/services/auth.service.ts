@@ -77,7 +77,7 @@ export class AuthService {
         this.router.navigate(['/medico']);
         break;
       case 'paciente':
-        this.router.navigate(['/']);
+        this.router.navigate(['/paciente']);
         break;
       default:
         this.router.navigate(['/']);

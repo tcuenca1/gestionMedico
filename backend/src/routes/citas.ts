@@ -8,7 +8,15 @@ const router = express.Router();
 
 router.get('/', authenticateToken, async (req: any, res: any) => {
   try {
-    const { medico_id, paciente_id, estado, fecha_desde, fecha_hasta } = req.query;
+    let { medico_id, paciente_id, estado, fecha_desde, fecha_hasta } = req.query;
+    
+    if (!medico_id && req.user && req.user.rol === 'Médico') {
+      const medRes = await pool.query('SELECT ID_Medico FROM Medico WHERE ID_Usuario = $1', [req.user.id]);
+      if (medRes.rows.length > 0) {
+        medico_id = medRes.rows[0].id_medico;
+      }
+    }
+
     let query = `
       SELECT c.*,
              p.Nombres AS Paciente_Nombres, p.Apellidos AS Paciente_Apellidos, p.DNI AS Paciente_DNI, p.Telefono AS Paciente_Telefono,

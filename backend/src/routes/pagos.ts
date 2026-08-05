@@ -14,7 +14,7 @@ router.get('/', authenticateToken, async (req: any, res: any) => {
        JOIN Consulta_Medica cm ON p.ID_Consulta = cm.ID_Consulta
        JOIN Cita c ON cm.ID_Cita = c.ID_Cita
        JOIN Paciente pac ON c.ID_Paciente = pac.ID_Paciente
-       ORDER BY p.Fecha_Pago DESC`,
+       ORDER BY p.Fecha_Pago ASC`,
     );
     res.json(normalizeRows(result.rows));
   } catch (error) {

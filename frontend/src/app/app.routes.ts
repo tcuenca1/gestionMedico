@@ -23,6 +23,10 @@ const medicoNav: NavItem[] = [
   { label: 'Historial Clínico', route: '/medico/historial', icon: 'bi-journal-text' },
 ];
 
+const pacienteNav: NavItem[] = [
+  { label: 'Mis Citas', route: '/paciente', icon: 'bi-calendar-check' },
+];
+
 export const routes: Routes = [
   {
     path: 'login',
@@ -68,6 +72,15 @@ export const routes: Routes = [
       { path: 'consulta/:idCita', loadComponent: () => import('./features/medico/consulta/medico-consulta') },
       { path: 'historial', loadComponent: () => import('./features/medico/historial/historial-clinico') },
       { path: 'historial/paciente/:idPaciente', loadComponent: () => import('./features/medico/historial/historial-clinico') },
+    ],
+  },
+  {
+    path: 'paciente',
+    canActivate: [roleGuard(['paciente'])],
+    component: SidebarLayout,
+    data: { navItems: pacienteNav, title: 'Portal del Paciente', roleName: 'Paciente' },
+    children: [
+      { path: '', loadComponent: () => import('./features/recepcion/citas/recepcion-citas') },
     ],
   },
   {

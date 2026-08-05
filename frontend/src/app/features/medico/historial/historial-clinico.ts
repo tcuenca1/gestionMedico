@@ -107,9 +107,15 @@ export default class HistorialClinicoComponent {
     this.loading.set(true);
     const desde = this.filtroDesde() || undefined;
     const hasta = this.filtroHasta() || undefined;
-    this.consultasSvc.getHistorialByPaciente(idPaciente, desde, hasta).subscribe((data) => {
-      this.historial.set(data);
-      this.loading.set(false);
+    this.consultasSvc.getHistorialByPaciente(idPaciente, desde, hasta).subscribe({
+      next: (data) => {
+        this.historial.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.historial.set([]);
+        this.loading.set(false);
+      },
     });
   }
 
@@ -242,6 +248,11 @@ export default class HistorialClinicoComponent {
   }
 
   imprimir(): void {
+    const pac = this.selectedPaciente();
+    if (!pac) return;
+    const token = localStorage.getItem('token') || '';
+    const url = `${(window as any).location?.origin || ''}/api/pacientes/${pac.ID_Paciente}/historial/pdf`;
+    // Fallback direct print window if needed or pdf endpoint
     window.print();
   }
 }

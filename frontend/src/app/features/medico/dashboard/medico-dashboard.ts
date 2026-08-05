@@ -49,12 +49,20 @@ export default class MedicoDashboardComponent {
 
   loadData(): void {
     this.loading.set(true);
-    const idMedico = this.auth.currentUser()?.idMedico;
-    if (!idMedico) return;
-    this.citasSvc.getByMedico(idMedico).subscribe((data) => {
-      const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
-      this.citasHoy.set(data.filter(c => c.Fecha_Hora.startsWith(hoy)));
+    const idMedico = this.auth.currentUser()?.idMedico || (this.auth.currentUser() as any)?.usuario?.ID_Usuario;
+    if (!idMedico) {
       this.loading.set(false);
+      return;
+    }
+    this.citasSvc.getByMedico(idMedico).subscribe({
+      next: (data) => {
+        const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        this.citasHoy.set(data.filter(c => c.Fecha_Hora.startsWith(hoy)));
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      }
     });
   }
 

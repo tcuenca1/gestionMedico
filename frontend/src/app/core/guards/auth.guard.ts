@@ -6,13 +6,14 @@ const HOME_BY_ROLE: Record<string, string> = {
   administrador: '/admin/dashboard',
   recepcionista: '/recepcion',
   medico: '/medico',
-  paciente: '/',
+  paciente: '/paciente',
 };
 
 const PREFIX_BY_ROLE: Record<string, string[]> = {
-  administrador: ['/admin', '/recepcion', '/medico'],
+  administrador: ['/admin'],
   recepcionista: ['/recepcion'],
   medico: ['/medico'],
+  paciente: ['/paciente'],
 };
 
 function normalizeRole(rol: string): string {

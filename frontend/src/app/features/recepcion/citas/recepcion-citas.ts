@@ -88,11 +88,14 @@ export default class RecepcionCitasComponent {
     }
     this.loading.set(true);
     this.errorMsg.set('');
+    const fechaCita = this.form.Fecha_Hora.split('T')[0];
     this.citasSvc.create(this.form).subscribe({
       next: () => {
         this.loading.set(false);
         this.showForm.set(false);
+        this.filterDate.set(fechaCita);
         this.loadCitas();
+        this.notif.success('Cita agendada correctamente');
       },
       error: (err) => {
         this.loading.set(false);
