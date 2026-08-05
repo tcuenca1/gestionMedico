@@ -23,9 +23,9 @@
             <div class="col-md-4">
               <label class="form-label">Especialidad</label>
               <select class="form-select" [(ngModel)]="form.ID_Especialidad" name="especialidad" required>
-                <option value="0">Seleccione...</option>
+                <option [ngValue]="0" disabled>Seleccione...</option>
                 @for (e of especialidades(); track e.ID_Especialidad) {
-                  <option [value]="e.ID_Especialidad">{{ e.Nombre_Especialidad }}</option>
+                  <option [ngValue]="e.ID_Especialidad">{{ e.Nombre_Especialidad }}</option>
                 }
               </select>
             </div>

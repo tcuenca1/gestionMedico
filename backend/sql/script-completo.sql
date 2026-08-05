@@ -291,39 +291,38 @@ BEFORE INSERT OR UPDATE ON Pago
 FOR EACH ROW
 EXECUTE FUNCTION fn_registrar_fecha_pago();
 
--- D. Función y Triggers de Auditoría Automática (Corregido para evitar referencias a columnas inexistentes)
+-- D. Función y Triggers de Auditoría Automática (Corregido con manejo seguro de columnas ID)
 CREATE OR REPLACE FUNCTION fn_auditar_cambios()
 RETURNS TRIGGER AS $$
 DECLARE
-    v_id INT;
+    v_id INT := 0;
+    v_rec RECORD;
 BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        v_rec := OLD;
+    ELSE
+        v_rec := NEW;
+    END IF;
+
+    BEGIN
+        IF TG_TABLE_NAME = 'paciente' THEN v_id := v_rec.id_paciente;
+        ELSIF TG_TABLE_NAME = 'cita' THEN v_id := v_rec.id_cita;
+        ELSIF TG_TABLE_NAME = 'pago' THEN v_id := v_rec.id_pago;
+        ELSIF TG_TABLE_NAME = 'medico' THEN v_id := v_rec.id_medico;
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        v_id := 0;
+    END;
+
     IF (TG_OP = 'INSERT') THEN
-        v_id := CASE 
-            WHEN TG_TABLE_NAME = 'paciente' THEN NEW.id_paciente
-            WHEN TG_TABLE_NAME = 'cita' THEN NEW.id_cita
-            WHEN TG_TABLE_NAME = 'pago' THEN NEW.id_pago
-            ELSE 0 
-        END;
         INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Nuevos)
         VALUES (TG_TABLE_NAME, 'INSERT', v_id, to_jsonb(NEW));
         RETURN NEW;
     ELSIF (TG_OP = 'UPDATE') THEN
-        v_id := CASE 
-            WHEN TG_TABLE_NAME = 'paciente' THEN NEW.id_paciente
-            WHEN TG_TABLE_NAME = 'cita' THEN NEW.id_cita
-            WHEN TG_TABLE_NAME = 'pago' THEN NEW.id_pago
-            ELSE 0 
-        END;
         INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Anteriores, Datos_Nuevos)
         VALUES (TG_TABLE_NAME, 'UPDATE', v_id, to_jsonb(OLD), to_jsonb(NEW));
         RETURN NEW;
     ELSIF (TG_OP = 'DELETE') THEN
-        v_id := CASE 
-            WHEN TG_TABLE_NAME = 'paciente' THEN OLD.id_paciente
-            WHEN TG_TABLE_NAME = 'cita' THEN OLD.id_cita
-            WHEN TG_TABLE_NAME = 'pago' THEN OLD.id_pago
-            ELSE 0 
-        END;
         INSERT INTO Auditoria_Log (Tabla_Afectada, Operacion, ID_Registro, Datos_Anteriores)
         VALUES (TG_TABLE_NAME, 'DELETE', v_id, to_jsonb(OLD));
         RETURN OLD;
@@ -342,6 +341,10 @@ FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
 
 CREATE TRIGGER trg_auditar_pago
 AFTER INSERT OR UPDATE OR DELETE ON Pago
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditar_medico
+AFTER INSERT OR UPDATE OR DELETE ON Medico
 FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
 
 
