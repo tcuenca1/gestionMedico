@@ -70,7 +70,10 @@
           <input type="date" class="form-control form-control-sm" style="width: 140px;"
             [ngModel]="fechaSeleccionada()"
             (ngModelChange)="cambiarFecha($event)" />
-          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ citas().length }} citas</span>
+          <input type="text" class="form-control form-control-sm" style="width: 160px;"
+            placeholder="Buscar por paciente..."
+            [(ngModel)]="filtroTexto" />
+          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ citasFiltradas().length }} citas</span>
         </div>
       </div>
       <div class="table-responsive">
@@ -87,7 +90,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (c of citas(); track c.ID_Cita) {
+            @for (c of citasFiltradas(); track c.ID_Cita) {
               <tr class="align-middle">
                 <td><span class="fw-semibold">{{ c.Fecha_Hora | date:'HH:mm' }}</span></td>
                 <td>{{ c.Paciente_Nombre }}</td>

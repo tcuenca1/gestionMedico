@@ -102,12 +102,24 @@ export default class RecepcionCitasComponent {
   }
 
   updateEstado(id: number, estado: string): void {
-    this.citasSvc.updateEstado(id, estado).subscribe(() => this.loadCitas());
+    this.citasSvc.updateEstado(id, estado).subscribe({
+      next: () => {
+        this.loadCitas();
+        this.notif.success(`Cita actualizada a ${estado}`);
+      },
+      error: () => this.notif.error('Error al actualizar el estado de la cita')
+    });
   }
 
   delete(id: number): void {
     if (confirm('¿Cancelar esta cita?')) {
-      this.citasSvc.delete(id).subscribe(() => { this.loadCitas(); this.notif.success('Cita cancelada'); });
+      this.citasSvc.updateEstado(id, 'Cancelada').subscribe({
+        next: () => {
+          this.loadCitas();
+          this.notif.success('Cita cancelada correctamente');
+        },
+        error: () => this.notif.error('Error al cancelar la cita')
+      });
     }
   }
 }

@@ -67,6 +67,10 @@ router.get('/reporte/pdf', authenticateToken, async (req: any, res: any) => {
     );
 
     const pagos = result.rows;
+    if (pagos.length === 0) {
+      return res.status(404).json({ message: 'No hay registros de pagos en el rango seleccionado' });
+    }
+
     const total = pagos.reduce((acc, p) => acc + Number(p.monto), 0);
 
     const html = `
@@ -103,7 +107,7 @@ router.get('/reporte/pdf', authenticateToken, async (req: any, res: any) => {
             </tr>
           </thead>
           <tbody>
-            ${pagos.length > 0 ? pagos.map(p => `
+            ${pagos.map(p => `
               <tr>
                 <td>${p.id_pago}</td>
                 <td>${p.paciente_nombre}</td>
@@ -111,7 +115,7 @@ router.get('/reporte/pdf', authenticateToken, async (req: any, res: any) => {
                 <td>${new Date(p.fecha_pago).toLocaleDateString()}</td>
                 <td>${p.estado_pago}</td>
               </tr>
-            `).join('') : '<tr><td colspan="5" style="text-align:center;">No hay registros en este rango</td></tr>'}
+            `).join('')}
           </tbody>
         </table>
         <div class="total">
@@ -123,7 +127,7 @@ router.get('/reporte/pdf', authenticateToken, async (req: any, res: any) => {
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=reporte-pagos_${fechaInicio}_${fechaFin}.pdf`);
-    res.send(html);
+    res.send(Buffer.from(html));
   } catch (error) {
     console.error('Error al generar PDF de reporte:', error);
     res.status(500).json({ message: 'Error al generar reporte en PDF' });

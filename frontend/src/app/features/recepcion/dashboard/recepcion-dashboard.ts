@@ -16,9 +16,22 @@ export default class RecepcionDashboardComponent {
   private dashSvc = inject(DashboardService);
 
   citas = signal<CitaView[]>([]);
+  filtroTexto = signal('');
   stats = signal({ citasHoy: 0, citasPendientes: 0, citasAtendidas: 0, ingresosHoy: 0 });
   loading = signal(true);
   fechaSeleccionada = signal(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]);
+
+  citasFiltradas = computed(() => {
+    const term = this.filtroTexto().toLowerCase().trim();
+    const lista = this.citas();
+    if (!term) return lista;
+    return lista.filter(
+      (c) =>
+        (c.Paciente_Nombre && c.Paciente_Nombre.toLowerCase().includes(term)) ||
+        (c.Medico_Nombre && c.Medico_Nombre.toLowerCase().includes(term)) ||
+        (c.Especialidad && c.Especialidad.toLowerCase().includes(term))
+    );
+  });
 
   tituloFecha = computed(() => {
     const hoy = new Date();
