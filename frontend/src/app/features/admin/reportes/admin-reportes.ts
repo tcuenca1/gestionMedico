@@ -46,6 +46,8 @@ export default class AdminReportesComponent {
     const url = `http://localhost:3000/api/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}&token=${token}`;
     window.open(url, '_blank');
   }
+
+  generateReporte(): void {
     this.errorMsg.set('');
     if (!this.fechaInicio() || !this.fechaFin()) return;
     if (this.fechaInicio() > this.fechaFin()) {
@@ -53,11 +55,17 @@ export default class AdminReportesComponent {
       return;
     }
     this.loading.set(true);
-    this.pagosSvc.getReporte(this.fechaInicio(), this.fechaFin()).subscribe((data) => {
-      this.pagos.set(data);
-      this.total.set(data.reduce((acc, p) => acc + Number(p.Monto), 0));
-      this.showReporte.set(true);
-      this.loading.set(false);
+    this.pagosSvc.getReporte(this.fechaInicio(), this.fechaFin()).subscribe({
+      next: (data: Pago[]) => {
+        this.pagos.set(data);
+        this.total.set(data.reduce((acc: number, p: Pago) => acc + Number(p.Monto), 0));
+        this.showReporte.set(true);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.errorMsg.set('Error al cargar el reporte de pagos');
+        this.loading.set(false);
+      }
     });
   }
 }
