@@ -1,8 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { PagosService } from '../../../core/services/pagos.service';
 import { Pago } from '../../../core/models/pago';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-reportes',
@@ -11,6 +13,7 @@ import { Pago } from '../../../core/models/pago';
 })
 export default class AdminReportesComponent {
   private pagosSvc = inject(PagosService);
+  private http = inject(HttpClient);
 
   pagos = signal<Pago[]>([]);
   fechaInicio = signal('');
@@ -43,8 +46,20 @@ export default class AdminReportesComponent {
   downloadPdf(): void {
     if (!this.fechaInicio() || !this.fechaFin()) return;
     const token = localStorage.getItem('token') || '';
-    const url = `http://localhost:3000/api/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}&token=${token}`;
-    window.open(url, '_blank');
+    const url = `${environment.apiBaseUrl}/pagos/reporte/pdf?inicio=${this.fechaInicio()}&fin=${this.fechaFin()}`;
+    const headers = new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
+    this.http.get(url, { headers, responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `reporte-pagos_${this.fechaInicio()}_${this.fechaFin()}.pdf`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      },
+      error: () => {
+        this.errorMsg.set('Error al descargar el PDF del reporte');
+      },
+    });
   }
 
   generateReporte(): void {

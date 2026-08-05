@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard, roleGuard } from './core/guards/auth.guard';
 import { SidebarLayout } from './shared/layouts/sidebar-layout';
 import { NavItem } from './shared/layouts/sidebar-layout';
 
@@ -35,7 +35,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [authGuard],
+    canActivate: [roleGuard(['administrador'])],
     component: SidebarLayout,
     data: { navItems: adminNav, title: 'Admin SGMP', roleName: 'Administrador' },
     children: [
@@ -48,7 +48,7 @@ export const routes: Routes = [
   },
   {
     path: 'recepcion',
-    canActivate: [authGuard],
+    canActivate: [roleGuard(['recepcionista'])],
     component: SidebarLayout,
     data: { navItems: recepcionNav, title: 'Recepción SGMP', roleName: 'Recepcionista' },
     children: [
@@ -60,7 +60,7 @@ export const routes: Routes = [
   },
   {
     path: 'medico',
-    canActivate: [authGuard],
+    canActivate: [roleGuard(['medico'])],
     component: SidebarLayout,
     data: { navItems: medicoNav, title: 'Médico SGMP', roleName: 'Médico' },
     children: [

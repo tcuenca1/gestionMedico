@@ -124,15 +124,29 @@ export class ChatService {
   abrirConversacion(conv: Conversacion) {
     console.log('[Chat] abrirConversacion', conv.id, conv.otro_usuario?.nombre);
     this.conversacionActiva.set(conv);
-    this.api.get<Mensaje[]>(`/chat/conversaciones/${conv.id}/mensajes`).subscribe({
+    this.api.get<any[]>(`/chat/conversaciones/${conv.id}/mensajes`).subscribe({
       next: (msgs) => {
-        console.log('[Chat] mensajes cargados', msgs.length);
-        this.mensajes.set(msgs);
+        const mapeados: Mensaje[] = (Array.isArray(msgs) ? msgs : []).map((m) => ({
+          ...m,
+          remitente_nombre:
+            m.remitente_nombre ||
+            m.Remitente_Nombre ||
+            m.usuario_nombre ||
+            m.Usuario_Nombre ||
+            m.Nombre ||
+            m.nombre ||
+            m.Username_Correo ||
+            m.username_correo ||
+            null,
+        }));
+        console.log('[Chat] mensajes cargados', mapeados.length);
+        this.mensajes.set(mapeados);
         this.socket?.emit('conversacion:abrir', { conversacion_id: conv.id });
         this.cargarConversaciones().subscribe();
       },
       error: (err) => {
         console.error('[Chat] Error al cargar mensajes:', err);
+        this.mensajes.set([]);
       },
     });
   }
