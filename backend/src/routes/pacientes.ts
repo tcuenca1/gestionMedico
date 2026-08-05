@@ -110,4 +110,33 @@ router.put('/:id', authenticateToken, async (req: any, res: any) => {
   }
 });
 
+router.delete('/:id', authenticateToken, async (req: any, res: any) => {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    await client.query('BEGIN');
+
+    const pacResult = await client.query('SELECT ID_Usuario FROM Paciente WHERE ID_Paciente = $1', [id]);
+    if (pacResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Paciente no encontrado' });
+    }
+    const userId = pacResult.rows[0].id_usuario;
+
+    await client.query('DELETE FROM Paciente WHERE ID_Paciente = $1', [id]);
+    if (userId) {
+      await client.query('DELETE FROM Usuario WHERE ID_Usuario = $1', [userId]);
+    }
+
+    await client.query('COMMIT');
+    res.json({ message: 'Paciente eliminado correctamente' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al eliminar paciente:', error);
+    res.status(500).json({ message: 'Error al eliminar paciente' });
+  } finally {
+    client.release();
+  }
+});
+
 export default router;

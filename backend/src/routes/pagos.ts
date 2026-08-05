@@ -62,7 +62,7 @@ router.get('/reporte/pdf', authenticateToken, async (req: any, res: any) => {
        JOIN Cita c ON cm.ID_Cita = c.ID_Cita
        JOIN Paciente pac ON c.ID_Paciente = pac.ID_Paciente
        WHERE DATE(p.Fecha_Pago) >= $1 AND DATE(p.Fecha_Pago) <= $2
-       ORDER BY p.Fecha_Pago DESC`,
+       ORDER BY p.ID_Pago ASC`,
       [fechaInicio, fechaFin]
     );
 
@@ -121,11 +121,11 @@ router.get('/reporte/pdf', authenticateToken, async (req: any, res: any) => {
       </html>
     `;
 
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('Content-Disposition', `inline; filename=reporte-pagos_${fechaInicio}_${fechaFin}.html`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=reporte-pagos_${fechaInicio}_${fechaFin}.pdf`);
     res.send(html);
   } catch (error) {
-    console.error('Error al generar PDF/HTML de reporte:', error);
+    console.error('Error al generar PDF de reporte:', error);
     res.status(500).json({ message: 'Error al generar reporte en PDF' });
   }
 });

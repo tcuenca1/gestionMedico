@@ -10,8 +10,8 @@ Este documento detalla el plan de trabajo de **16 semanas** estructurado bajo un
 | :--- | :--- | :--- | :--- |
 | **Fase 1** | Levantamiento, Análisis de Requerimientos e Interacción con el Cliente | Semanas 1 – 3 | Definición del alcance, ERS, historias de usuario, diagramas UML, diagramas DER y mockups en Figma. |
 | **Fase 2** | Diseño de Arquitectura, Entorno y Modelado de Base de Datos | Semanas 4 – 5 | Configuración de repositorios, CI/CD, diseño DDL en PostgreSQL y estructuración base de arquitecturas (Angular y Express). |
-| **Fase 3** | Desarrollo Incremental por Sprints / Módulos | Semanas 6 – 11 | Construcción de autenticación JWT, roles, CRUDs de negocio (médicos, pacientes, citas, pagos, chat, exámenes). |
-| **Fase 4** | Garantía de Calidad (QA), Pruebas y Corrección de Bugs | Semanas 12 – 13 | Pruebas unitarias, integración, pruebas de seguridad (Rate Limit, Helmet) y estabilización de errores. |
+| **Fase 3** | Desarrollo Incremental por Sprints / Módulos | Semanas 6 – 11 | Construcción de autenticación JWT, roles, CRUDs de negocio (médicos, pacientes, citas, pagos, chat, exámenes) y aplicación móvil híbrida. |
+| **Fase 4** | Garantía de Calidad (QA), Pruebas y Corrección de Bugs | Semanas 12 – 13 | Pruebas unitarias, integración, pruebas de seguridad (Rate Limit, Helmet), pruebas en dispositivos móviles y estabilización de errores. |
 | **Fase 5** | Despliegue en Producción | Semanas 14 – 15 | Instanciación en Railway (PostgreSQL y Backend) y Vercel (Frontend), pruebas de humo y validación de conectividad. |
 | **Fase 6** | Cierre, Documentación Final y Entrega Oficial | Semana 16 | Manuales técnicos, de usuario, aceptación formal con el cliente y firma de cierre. |
 
@@ -43,17 +43,18 @@ Este documento detalla el plan de trabajo de **16 semanas** estructurado bajo un
 | T20 | Semana 10 | Fase 3 (Sprint 5) | Desarrollo del módulo de Consultas Médicas, signos vitales, recetas y registro de pagos vinculados en el backend. | Endpoints `/api/consultas` y `/api/pagos` | Postman |
 | T21 | Semana 10 | Fase 3 (Sprint 5) | Construcción de la interfaz clínica del médico para la atención de pacientes, prescripción de recetas y visualización de historial. | Vista de Consulta Médica interactiva | Angular |
 | T22 | Semana 11 | Fase 3 (Sprint 6) | Integración del servidor de WebSockets (`Socket.IO`) en el backend para mensajería en tiempo real entre usuarios del policlínico. | Servidor WebSocket operativo en `/api/chat` | Socket.IO / Postman |
-| T23 | Semana 11 | Fase 3 (Sprint 6) | Desarrollo del componente de Chat en tiempo real y panel de notificaciones flotantes (Toasts) en el frontend. | Módulo de Chat integrado en vistas principales | Angular |
+| T22B | Semana 11 | Fase 3 (Sprint 6) | Desarrollo de la Aplicación Móvil híbrida (Ionic/Capacitor o React Native / Flutter) conectada a la API backend para visualización de citas y perfil del paciente. | Aplicación móvil compilable (APK / emulador) | Capacitor / VS Code |
+| T23 | Semana 11 | Fase 3 (Sprint 6) | Desarrollo del componente de Chat en tiempo real y panel de notificaciones flotantes (Toasts) en el frontend y app móvil. | Módulo de Chat integrado en vistas y app móvil | Angular / Móvil |
 | T24 | Semana 12 | Fase 4 | Ejecución de pruebas unitarias y de integración en el backend utilizando entornos de prueba aislados. | Reporte de cobertura de pruebas unitarias | Vitest / Jest |
 | T25 | Semana 12 | Fase 4 | Auditoría y pruebas de seguridad: verificación de cabeceras HTTP (`helmet`), protección contra fuerza bruta en login (`express-rate-limit`). | Informe de Vulnerabilidades y mitigaciones | OWASP ZAP / Postman |
-| T26 | Semana 13 | Fase 4 | Pruebas funcionales de aceptación (UAT) de los flujos completos del ERS en conjunto con usuarios clave del policlínico. | Matriz de Pruebas UAT y registro de incidencias | TestRail / Excel |
+| T26 | Semana 13 | Fase 4 | Pruebas funcionales de aceptación (UAT) de los flujos completos del ERS y la aplicación móvil en conjunto con usuarios clave del policlínico. | Matriz de Pruebas UAT y registro de incidencias | TestRail / Excel |
 | T27 | Semana 13 | Fase 4 | Jornada intensiva de depuración (debugging) y corrección de bugs críticos y menores reportados en la fase de pruebas. | Versión de software estabilizada (v1.0-RC) | GitHub Issues |
 | T28 | Semana 14 | Fase 5 | Creación y configuración del proyecto y base de datos PostgreSQL en la plataforma de nube **Railway**. | Instancia de PostgreSQL en producción activa | Railway Dashboard |
 | T29 | Semana 14 | Fase 5 | Ejecución del script DDL unificado (`script-completo.sql`) en la base de datos de producción de Railway y carga de catálogos. | Base de datos poblada en la nube | pgAdmin / DBeaver |
 | T30 | Semana 15 | Fase 5 | Despliegue del backend Node.js en Railway, configuración de variables de entorno seguras (`PORT`, `JWT_SECRET`, `DATABASE_URL`). | API REST y WebSocket desplegados en producción | Railway CLI / Logs |
 | T31 | Semana 15 | Fase 5 | Despliegue de la aplicación frontend en **Vercel**, configuración de redirecciones SPA y apuntamiento hacia la API de Railway (`environment.prod.ts`). | Aplicación web accesible en URL pública de Vercel | Vercel Dashboard |
 | T32 | Semana 15 | Fase 5 | Ejecución de pruebas de humo (*smoke tests*) en producción: validación de login, creación de citas, chats y conectividad HTTPS/WSS. | Certificado de validación de entorno productivo | Postman / Browser |
-| T33 | Semana 16 | Fase 6 | Redacción y estructuración del Manual de Usuario final para roles de Administrador, Recepcionista y Médico. | Manual de Usuario en formato PDF / Markdown | Notion / Docs |
+| T33 | Semana 16 | Fase 6 | Redacción y estructuración del Manual de Usuario final para roles de Administrador, Recepcionista, Médico y la aplicación móvil de Pacientes. | Manual de Usuario en formato PDF / Markdown | Notion / Docs |
 | T34 | Semana 16 | Fase 6 | Elaboración de la documentación técnica de la API REST y eventos de WebSockets (Swagger / Postman Collection). | Documentación Técnica de la API | Postman / OpenAPI |
 | T35 | Semana 16 | Fase 6 | Reunión final de aceptación con el cliente, demostración en vivo (Demo day) operando sobre los entornos de Railway y Vercel. | Minuta de demostración y comentarios del cliente | Google Meet |
 | T36 | Semana 16 | Fase 6 | Firma oficial del Acta de Recepción y Cierre del Proyecto, transferencia de credenciales y repositorio a la administración del policlínico. | Acta de Entrega y Cierre firmada | Documento legal / PDF |

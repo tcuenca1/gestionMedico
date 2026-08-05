@@ -84,7 +84,7 @@ router.put('/:id', authenticateToken, requireRole('Administrador'), async (req: 
   const client = await pool.connect();
   try {
     const { id } = req.params;
-    const { Nombres, Apellidos, ID_Especialidad, Numero_Colegiatura, Username_Correo } = req.body;
+    const { Nombres, Apellidos, ID_Especialidad, Numero_Colegiatura, Username_Correo, Password } = req.body;
 
     await client.query('BEGIN');
 
@@ -99,9 +99,15 @@ router.put('/:id', authenticateToken, requireRole('Administrador'), async (req: 
       return res.status(404).json({ message: 'Médico no encontrado' });
     }
 
+    const userId = result.rows[0].id_usuario;
+
     if (Username_Correo) {
-      const userId = result.rows[0].id_usuario;
       await client.query('UPDATE Usuario SET Username_Correo = $1 WHERE ID_Usuario = $2', [Username_Correo, userId]);
+    }
+
+    if (Password && Password.trim() !== '') {
+      const hashedPassword = await bcrypt.hash(Password, 10);
+      await client.query('UPDATE Usuario SET Password_Hash = $1 WHERE ID_Usuario = $2', [hashedPassword, userId]);
     }
 
     await client.query('COMMIT');
@@ -128,14 +134,17 @@ router.delete('/:id', authenticateToken, requireRole('Administrador'), async (re
     }
     const userId = medResult.rows[0].id_usuario;
 
-    await client.query('UPDATE Usuario SET Estado_Activo = false WHERE ID_Usuario = $1', [userId]);
+    await client.query('DELETE FROM Medico WHERE ID_Medico = $1', [id]);
+    await client.query('DELETE FROM Usuario WHERE ID_Usuario = $1', [userId]);
 
     await client.query('COMMIT');
-    res.json({ message: 'Médico desactivado correctamente' });
+    res.json({ message: 'Médico eliminado correctamente' });
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Error al desactivar médico:', error);
-    res.status(500).json({ message: 'Error al desactivar médico' });
+    console.error('Error al eliminar médico:', error);
+    res.status(500).json({ message: 'Error al eliminar médico' });
+  } finally {
+    client.release();
   }
 });
 
